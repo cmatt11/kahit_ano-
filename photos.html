@@ -100,15 +100,15 @@
       if (!url) return '';
 
       // Handle drive.google.com/file/d/FILE_ID/view format
-      const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+      const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
       if (driveFileMatch) {
-        return 'https://drive.google.com/uc?export=view&id=' + driveFileMatch[1];
+        return 'https://lh3.googleusercontent.com/d/' + driveFileMatch[1];
       }
 
       // Handle drive.google.com/open?id=FILE_ID format
-      const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+      const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([^&\?]+)/);
       if (driveOpenMatch) {
-        return 'https://drive.google.com/uc?export=view&id=' + driveOpenMatch[1];
+        return 'https://lh3.googleusercontent.com/d/' + driveOpenMatch[1];
       }
 
       // Direct URL (imgur, etc.) - use as-is
