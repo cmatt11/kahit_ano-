@@ -41,30 +41,10 @@
       <p data-en="judge my personality based on my playlist names lol">pang judge ng personality ko based sa playlist names ko lol</p>
     </div>
 
-    <div class="music-grid">
-      <div class="music-card fade-in">
-        <h3 data-en="explicit lol">bastos amp</h3>
-        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/15KjGw280ZFE5kVToDoxKz?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-      </div>
-
-      <div class="music-card fade-in">
-        <h3 data-en="in love as if it's real">panginlove kala mo naman talaga</h3>
-        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/6Xaa2LG0RsFurhEyTawmsm?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-      </div>
-
-      <div class="music-card fade-in">
-        <h3 data-en="wanna die playlist HWHAHAH jk">gusto mamatay pl HWHAHAH eme</h3>
-        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/2w8D6MGhkVn7aLnDSbHgXA?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-      </div>
-
-      <div class="music-card fade-in">
-        <h3>randoms</h3>
-        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/1ouD3LmB1bXhKRnZ18QFn8?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-      </div>
-
-      <div class="music-card fade-in">
-        <h3 data-en="that time I was sure I was a lesbian HWHAHAHAHAHA">that time na sure akong lesbian ako HWHAHAHAHAHA</h3>
-        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/1LNpq8E401TyWYsaSeWoTu?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    <div class="music-grid" id="music-grid">
+      <!-- Loading state -->
+      <div class="music-loading" id="music-loading">
+        <p>Loading my music... cheka lang 🎧</p>
       </div>
     </div>
   </section>
@@ -76,5 +56,209 @@
 
   <script src="script.js"></script>
   <script src="translate.js"></script>
+  <script>
+    (function() {
+      const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQSkHiIJi2oFsV8BE7KOC67luuWHntXXH8JNDS3-XKms_RyhoHmvMNyBPD6HTVhDD5sN48pXCnnYVhw/pub?output=csv';
+
+      function parseCSV(text) {
+        const lines = text.trim().split('\n');
+        // Skip header row
+        const rows = [];
+        for (let i = 1; i < lines.length; i++) {
+          const row = parseCSVLine(lines[i]);
+          if (row.length >= 4) {
+            rows.push({
+              title: row[0].trim(),
+              url: row[1].trim(),
+              type: row[2].trim().toLowerCase(),
+              platform: row[3].trim().toLowerCase()
+            });
+          }
+        }
+        return rows;
+      }
+
+      function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (inQuotes) {
+            if (char === '"') {
+              if (i + 1 < line.length && line[i + 1] === '"') {
+                current += '"';
+                i++;
+              } else {
+                inQuotes = false;
+              }
+            } else {
+              current += char;
+            }
+          } else {
+            if (char === '"') {
+              inQuotes = true;
+            } else if (char === ',') {
+              result.push(current);
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+        }
+        result.push(current);
+        return result;
+      }
+
+      function getSpotifyEmbed(url, type) {
+        // Extract ID from Spotify URLs like:
+        // https://open.spotify.com/playlist/ID?si=...
+        // https://open.spotify.com/track/ID?si=...
+        // https://open.spotify.com/album/ID?si=...
+        const match = url.match(/open\.spotify\.com\/(playlist|track|album)\/([a-zA-Z0-9]+)/);
+        if (!match) return null;
+
+        const spotifyType = match[1]; // playlist, track, or album
+        const id = match[2];
+        let height = 352;
+        if (spotifyType === 'track') {
+          height = 152;
+        }
+
+        return {
+          src: 'https://open.spotify.com/embed/' + spotifyType + '/' + id,
+          height: height
+        };
+      }
+
+      function getSoundCloudEmbed(url, type) {
+        const encodedUrl = encodeURIComponent(url);
+        const height = (type === 'playlist' || url.includes('/sets/')) ? 300 : 166;
+        return {
+          src: 'https://w.soundcloud.com/player/?url=' + encodedUrl + '&color=%235c3d2e&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false',
+          height: height
+        };
+      }
+
+      function getYouTubeEmbed(url) {
+        // Extract video ID from various YouTube URL formats
+        let videoId = null;
+        const patterns = [
+          /[?&]v=([a-zA-Z0-9_-]{11})/,
+          /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+          /embed\/([a-zA-Z0-9_-]{11})/
+        ];
+        for (const pattern of patterns) {
+          const match = url.match(pattern);
+          if (match) {
+            videoId = match[1];
+            break;
+          }
+        }
+        if (!videoId) return null;
+
+        return {
+          src: 'https://www.youtube.com/embed/' + videoId,
+          height: 200
+        };
+      }
+
+      function getEmbed(item) {
+        switch (item.platform) {
+          case 'spotify':
+            return getSpotifyEmbed(item.url, item.type);
+          case 'soundcloud':
+            return getSoundCloudEmbed(item.url, item.type);
+          case 'youtube':
+            return getYouTubeEmbed(item.url);
+          default:
+            return null;
+        }
+      }
+
+      function createMusicCard(item) {
+        const embed = getEmbed(item);
+        if (!embed) return null;
+
+        const card = document.createElement('div');
+        card.className = 'music-card fade-in';
+
+        const title = document.createElement('h3');
+        title.textContent = item.title;
+        card.appendChild(title);
+
+        const iframe = document.createElement('iframe');
+        iframe.style.borderRadius = '12px';
+        iframe.src = embed.src;
+        iframe.width = '100%';
+        iframe.height = embed.height;
+        iframe.frameBorder = '0';
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture');
+        iframe.loading = 'lazy';
+        card.appendChild(iframe);
+
+        return card;
+      }
+
+      function observeFadeIn() {
+        const cards = document.querySelectorAll('.music-card.fade-in');
+        const observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+
+        cards.forEach(function(card) {
+          observer.observe(card);
+        });
+      }
+
+      function loadMusic() {
+        const grid = document.getElementById('music-grid');
+        const loading = document.getElementById('music-loading');
+
+        fetch(SHEET_CSV_URL)
+          .then(function(response) {
+            if (!response.ok) throw new Error('Hindi ma-fetch ang data');
+            return response.text();
+          })
+          .then(function(csv) {
+            const items = parseCSV(csv);
+
+            // Remove loading
+            if (loading) loading.remove();
+
+            if (items.length === 0) {
+              grid.innerHTML = '<div class="music-loading"><p>Wala pang music dito... parang playlist ko pag walang wifi 😅</p></div>';
+              return;
+            }
+
+            items.forEach(function(item) {
+              const card = createMusicCard(item);
+              if (card) grid.appendChild(card);
+            });
+
+            // Setup fade-in animations
+            observeFadeIn();
+          })
+          .catch(function(err) {
+            console.error('Error loading music:', err);
+            if (loading) loading.remove();
+            grid.innerHTML = '<div class="music-loading"><p>Ay may error sa pag-load ng music. Baka nag-iinarte yung internet mo lol 🙃</p></div>';
+          });
+      }
+
+      // Start loading when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadMusic);
+      } else {
+        loadMusic();
+      }
+    })();
+  </script>
 </body>
 </html>

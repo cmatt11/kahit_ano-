@@ -404,6 +404,14 @@ img {
   border-radius: 8px;
 }
 
+.music-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--brown-light);
+  font-size: 0.95rem;
+}
+
 /* ===== GALLERY ===== */
 .gallery-grid {
   display: grid;
