@@ -752,3 +752,42 @@ img {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== TRANSLATE BUTTON ===== */
+.translate-btn {
+  position: fixed;
+  right: 1.2rem;
+  bottom: 2rem;
+  z-index: 999;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--brown-lighter);
+  background: var(--white);
+  color: var(--brown);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px var(--shadow);
+  transition: all var(--transition);
+  font-family: inherit;
+}
+
+.translate-btn:hover {
+  transform: scale(1.08);
+  border-color: var(--pink);
+  box-shadow: 0 6px 18px var(--shadow);
+}
+
+.translate-btn.active {
+  background: var(--brown);
+  color: var(--white);
+  border-color: var(--brown);
+}
+
+.translate-btn .translate-icon {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
