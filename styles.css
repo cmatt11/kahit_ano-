@@ -365,6 +365,14 @@ img {
   font-weight: 500;
 }
 
+.tots-loading,
+.tots-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--brown-light);
+  font-size: 0.95rem;
+}
+
 /* ===== MUSIC ===== */
 .music-grid {
   display: grid;
