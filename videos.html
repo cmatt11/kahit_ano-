@@ -36,73 +36,196 @@
 
   <!-- Videos Content -->
   <section class="section">
-    <div class="section-header fade-in">
-      <h2>Favorites</h2>
-      <p>These videos live in my "Watch Later" forever</p>
-    </div>
-
-    <div class="videos-grid">
-      <div class="video-card fade-in">
-        <div class="video-embed">
-          <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Funny video 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="video-info">
-          <h3>That One Video I Keep Sending to Everyone</h3>
-          <p>if you know, you know HAHAHAHA</p>
-        </div>
-      </div>
-
-      <div class="video-card fade-in">
-        <div class="video-embed">
-          <iframe src="https://www.youtube.com/embed/kJQP7kiw5Fk" title="Funny video 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="video-info">
-          <h3>Comfort Video #1</h3>
-          <p>watch this when you're sad. guaranteed serotonin boost</p>
-        </div>
-      </div>
-
-      <div class="video-card fade-in">
-        <div class="video-embed">
-          <iframe src="https://www.youtube.com/embed/9bZkp7q19f0" title="Funny video 3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="video-info">
-          <h3>Classic Never Gets Old</h3>
-          <p>a timeless masterpiece tbh</p>
-        </div>
-      </div>
-
-      <div class="video-card fade-in">
-        <div class="video-embed">
-          <iframe src="https://www.youtube.com/embed/fJ9rUzIMcZQ" title="Funny video 4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="video-info">
-          <h3>Late Night Rabbit Hole Find</h3>
-          <p>found this at 3am and never recovered</p>
-        </div>
-      </div>
-
-      <div class="video-card fade-in">
-        <div class="video-embed">
-          <iframe src="https://www.youtube.com/embed/RgKAFK5djSk" title="Funny video 5" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="video-info">
-          <h3>When I Need a Good Cry</h3>
-          <p>this one hits different at 2am ngl</p>
-        </div>
-      </div>
-
-      <div class="video-card fade-in">
-        <div class="video-embed">
-          <iframe src="https://www.youtube.com/embed/JGwWNGJdvx8" title="Funny video 6" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="video-info">
-          <h3>My Go-To Study Break</h3>
-          <p>one video break turns into 2 hours pero worth it</p>
-        </div>
+    <div class="videos-grid" id="videos-grid">
+      <div class="videos-loading" id="videos-loading">
+        <p>loading videos... sandali lang ha</p>
       </div>
     </div>
   </section>
+
+  <script>
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQluR27ryW3DGi7yG3d1UKWDPQejn7elBGyKtGadwmq4gQ5w82PiZ2-ZIyxbRbLgUvMbJBbX7zcBuoR/pub?output=csv';
+
+    function parseCSV(csvText) {
+      const rows = [];
+      let current = '';
+      let inQuotes = false;
+      let row = [];
+
+      for (let i = 0; i < csvText.length; i++) {
+        const char = csvText[i];
+        const next = csvText[i + 1];
+
+        if (inQuotes) {
+          if (char === '"' && next === '"') {
+            current += '"';
+            i++;
+          } else if (char === '"') {
+            inQuotes = false;
+          } else {
+            current += char;
+          }
+        } else {
+          if (char === '"') {
+            inQuotes = true;
+          } else if (char === ',') {
+            row.push(current.trim());
+            current = '';
+          } else if (char === '\n' || (char === '\r' && next === '\n')) {
+            row.push(current.trim());
+            current = '';
+            if (row.length > 0 && row.some(cell => cell !== '')) {
+              rows.push(row);
+            }
+            row = [];
+            if (char === '\r') i++;
+          } else {
+            current += char;
+          }
+        }
+      }
+
+      // Handle last row
+      if (current || row.length > 0) {
+        row.push(current.trim());
+        if (row.some(cell => cell !== '')) {
+          rows.push(row);
+        }
+      }
+
+      return rows;
+    }
+
+    function extractYouTubeID(url) {
+      if (!url) return null;
+
+      // youtube.com/watch?v=VIDEO_ID
+      let match = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+      if (match) return match[1];
+
+      // youtu.be/VIDEO_ID
+      match = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+      if (match) return match[1];
+
+      // youtube.com/embed/VIDEO_ID
+      match = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
+      if (match) return match[1];
+
+      // youtube.com/shorts/VIDEO_ID
+      match = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
+      if (match) return match[1];
+
+      return null;
+    }
+
+    function createVideoCard(videoUrl, title, caption) {
+      const videoId = extractYouTubeID(videoUrl);
+      if (!videoId) return null;
+
+      const card = document.createElement('div');
+      card.className = 'video-card fade-in';
+
+      const embedDiv = document.createElement('div');
+      embedDiv.className = 'video-embed';
+
+      const iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube.com/embed/' + videoId;
+      iframe.title = title || 'Video';
+      iframe.frameBorder = '0';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+
+      embedDiv.appendChild(iframe);
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'video-info';
+
+      const h3 = document.createElement('h3');
+      h3.textContent = title || 'Untitled';
+
+      const p = document.createElement('p');
+      p.textContent = caption || '';
+
+      infoDiv.appendChild(h3);
+      infoDiv.appendChild(p);
+
+      card.appendChild(embedDiv);
+      card.appendChild(infoDiv);
+
+      return card;
+    }
+
+    function observeFadeIn(elements) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      elements.forEach(el => observer.observe(el));
+    }
+
+    async function loadVideos() {
+      const grid = document.getElementById('videos-grid');
+      const loading = document.getElementById('videos-loading');
+
+      try {
+        const response = await fetch(SHEET_CSV_URL);
+        if (!response.ok) throw new Error('Failed to fetch');
+
+        const csvText = await response.text();
+        const rows = parseCSV(csvText);
+
+        // Remove header row
+        if (rows.length > 0) {
+          rows.shift();
+        }
+
+        // Remove loading
+        loading.remove();
+
+        if (rows.length === 0) {
+          grid.innerHTML = '<div class="videos-empty"><p>wala pang videos dito... babalik ako soon!</p></div>';
+          return;
+        }
+
+        // First row after header = newest, display in order
+        const cards = [];
+        rows.forEach(row => {
+          const videoUrl = row[0] || '';
+          const title = row[1] || '';
+          const caption = row[2] || '';
+
+          if (videoUrl) {
+            const card = createVideoCard(videoUrl, title, caption);
+            if (card) {
+              grid.appendChild(card);
+              cards.push(card);
+            }
+          }
+        });
+
+        if (cards.length === 0) {
+          grid.innerHTML = '<div class="videos-empty"><p>wala pang videos dito... babalik ako soon!</p></div>';
+          return;
+        }
+
+        // Observe all new cards for fade-in animation
+        observeFadeIn(cards);
+
+      } catch (error) {
+        loading.remove();
+        grid.innerHTML = '<div class="videos-empty"><p>ay sorry, di ko ma-load yung videos right now. try mo ulit mamaya!</p></div>';
+      }
+    }
+
+    loadVideos();
+  </script>
 
   <!-- Footer -->
   <footer class="footer">
