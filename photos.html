@@ -36,97 +36,168 @@
 
   <!-- Gallery Content -->
   <section class="section">
-    <div class="section-header fade-in">
-      <h2>Gallery</h2>
-      <p>Photos coming soon! For now, enjoy the placeholders hihi</p>
-    </div>
-
-    <div class="gallery-grid">
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">🌸</div>
-          <p>spring vibes</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">☕</div>
-          <p>coffee dates</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">🌅</div>
-          <p>golden hour</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">📚</div>
-          <p>study setup</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">🍰</div>
-          <p>food pics</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">🌿</div>
-          <p>plant parent era</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">✨</div>
-          <p>random aesthetic</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">🎨</div>
-          <p>art inspo</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">🐱</div>
-          <p>cute animals</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">🌙</div>
-          <p>night sky</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">🏠</div>
-          <p>cozy corners</p>
-        </div>
-      </div>
-
-      <div class="gallery-item fade-in">
-        <div class="placeholder">
-          <div class="placeholder-icon">💐</div>
-          <p>flowers always</p>
-        </div>
+    <div class="gallery-grid" id="gallery-grid">
+      <div class="gallery-loading" id="gallery-loading">
+        <p>loading photos... antay lang ha</p>
       </div>
     </div>
   </section>
+
+  <script>
+    const PHOTOS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQBmQDQVE4_hp-ggUu8KWsSrCvz7x1YQtWO_mIOSbp47WEuDkV__qvS77u1D3_zvuypTDv_MypUS5MM/pub?output=csv';
+
+    function parseCSV(csvText) {
+      const rows = [];
+      let current = '';
+      let inQuotes = false;
+      let row = [];
+
+      for (let i = 0; i < csvText.length; i++) {
+        const char = csvText[i];
+        const next = csvText[i + 1];
+
+        if (inQuotes) {
+          if (char === '"' && next === '"') {
+            current += '"';
+            i++;
+          } else if (char === '"') {
+            inQuotes = false;
+          } else {
+            current += char;
+          }
+        } else {
+          if (char === '"') {
+            inQuotes = true;
+          } else if (char === ',') {
+            row.push(current.trim());
+            current = '';
+          } else if (char === '\n' || (char === '\r' && next === '\n')) {
+            row.push(current.trim());
+            current = '';
+            if (row.length > 0 && row.some(cell => cell !== '')) {
+              rows.push(row);
+            }
+            row = [];
+            if (char === '\r') i++;
+          } else {
+            current += char;
+          }
+        }
+      }
+
+      // Handle last row
+      if (current || row.length > 0) {
+        row.push(current.trim());
+        if (row.some(cell => cell !== '')) {
+          rows.push(row);
+        }
+      }
+
+      return rows;
+    }
+
+    function convertImageUrl(url) {
+      if (!url) return '';
+
+      // Handle drive.google.com/file/d/FILE_ID/view format
+      const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+      if (driveFileMatch) {
+        return 'https://drive.google.com/uc?export=view&id=' + driveFileMatch[1];
+      }
+
+      // Handle drive.google.com/open?id=FILE_ID format
+      const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+      if (driveOpenMatch) {
+        return 'https://drive.google.com/uc?export=view&id=' + driveOpenMatch[1];
+      }
+
+      // Direct URL (imgur, etc.) - use as-is
+      return url;
+    }
+
+    function createGalleryItem(imageUrl, caption) {
+      const item = document.createElement('div');
+      item.className = 'gallery-item fade-in';
+
+      const img = document.createElement('img');
+      img.src = convertImageUrl(imageUrl);
+      img.alt = caption || 'Photo';
+      img.loading = 'lazy';
+      item.appendChild(img);
+
+      if (caption) {
+        const overlay = document.createElement('div');
+        overlay.className = 'gallery-caption';
+        overlay.textContent = caption;
+        item.appendChild(overlay);
+      }
+
+      return item;
+    }
+
+    function observeFadeIn(elements) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      elements.forEach(el => observer.observe(el));
+    }
+
+    async function loadPhotos() {
+      const grid = document.getElementById('gallery-grid');
+      const loading = document.getElementById('gallery-loading');
+
+      try {
+        const response = await fetch(PHOTOS_CSV_URL);
+        if (!response.ok) throw new Error('Failed to fetch');
+
+        const csvText = await response.text();
+        const rows = parseCSV(csvText);
+
+        // Remove header row
+        if (rows.length > 0) {
+          rows.shift();
+        }
+
+        // Remove loading
+        loading.remove();
+
+        if (rows.length === 0) {
+          grid.innerHTML = '<div class="gallery-empty"><p>wala pang photos dito... mag-uupload ako soon!</p></div>';
+          return;
+        }
+
+        // First row after header = newest, display in order
+        const items = [];
+        rows.forEach(row => {
+          const imageUrl = row[0] || '';
+          const caption = row[1] || '';
+
+          if (imageUrl) {
+            const item = createGalleryItem(imageUrl, caption);
+            grid.appendChild(item);
+            items.push(item);
+          }
+        });
+
+        // Observe all new items for fade-in animation
+        observeFadeIn(items);
+
+      } catch (error) {
+        loading.remove();
+        grid.innerHTML = '<div class="gallery-empty"><p>ay sorry, di ko ma-load yung photos right now. try mo ulit mamaya!</p></div>';
+      }
+    }
+
+    loadPhotos();
+  </script>
 
   <!-- Footer -->
   <footer class="footer">

@@ -453,6 +453,34 @@ img {
   opacity: 0.5;
 }
 
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.gallery-loading,
+.gallery-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--brown-light);
+  font-size: 0.95rem;
+}
+
 /* ===== VIDEOS ===== */
 .videos-grid {
   display: grid;
