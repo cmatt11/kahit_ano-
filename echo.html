@@ -163,16 +163,64 @@
       var wordEl = document.getElementById('echo-word');
       var hint = document.getElementById('echo-hint');
       var timeout = null;
+      // Color keywords
+      var colorMap = {
+        'red': '#e74c3c',
+        'orange': '#f39c12',
+        'yellow': '#f1c40f',
+        'green': '#2ecc71',
+        'blue': '#3498db',
+        'indigo': '#6c5ce7',
+        'violet': '#9b59b6'
+      };
+
+      // Rainbow popup
+      var rainbowPopup = null;
+
+      function showRainbowPopup() {
+        if (rainbowPopup) rainbowPopup.remove();
+        rainbowPopup = document.createElement('div');
+        rainbowPopup.textContent = 'bading ka no?';
+        rainbowPopup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#e74c3c,#f39c12,#f1c40f,#2ecc71,#3498db,#6c5ce7,#9b59b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:clamp(1.5rem,5vw,3rem);font-weight:700;z-index:999;opacity:0;transition:opacity 0.4s ease;pointer-events:none;text-align:center;';
+        document.body.appendChild(rainbowPopup);
+        setTimeout(function() { rainbowPopup.style.opacity = '1'; }, 50);
+        setTimeout(function() {
+          rainbowPopup.style.opacity = '0';
+          setTimeout(function() { if (rainbowPopup) rainbowPopup.remove(); }, 500);
+        }, 3000);
+      }
+
       function echoWord() {
         var word = input.value.trim().split(/\s+/)[0]; // only first word
         if (!word) return;
         input.value = '';
         hint.classList.remove('visible');
+
+        var lowerWord = word.toLowerCase();
+
+        // Check for rainbow keyword
+        if (lowerWord === 'rainbow') {
+          showRainbowPopup();
+        }
+
+        // Check for color keyword
+        var echoColor = colorMap[lowerWord] || '#ffffff';
+
         // Reset
         wordEl.classList.remove('echo-visible', 'echo-fading');
         void wordEl.offsetWidth;
         wordEl.textContent = word;
+        wordEl.style.color = echoColor;
+        if (lowerWord === 'rainbow') {
+          wordEl.style.cssText += ';background:linear-gradient(135deg,#e74c3c,#f39c12,#f1c40f,#2ecc71,#3498db,#6c5ce7,#9b59b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;';
+        } else {
+          wordEl.style.background = 'none';
+          wordEl.style.webkitBackgroundClip = 'unset';
+          wordEl.style.webkitTextFillColor = echoColor;
+          wordEl.style.backgroundClip = 'unset';
+        }
         wordEl.classList.add('echo-visible');
+
         if (timeout) clearTimeout(timeout);
         timeout = setTimeout(function() {
           wordEl.classList.add('echo-fading');
@@ -180,9 +228,13 @@
           setTimeout(function() {
             wordEl.textContent = '';
             wordEl.classList.remove('echo-fading');
+            wordEl.style.color = '#ffffff';
+            wordEl.style.background = 'none';
+            wordEl.style.webkitBackgroundClip = 'unset';
+            wordEl.style.webkitTextFillColor = '#ffffff';
             hint.classList.add('visible');
           }, 2000);
-        }, 3000); // visible for 3s, then 2s fade = 5s total
+        }, 3000);
       }
       btn.addEventListener('click', echoWord);
       input.addEventListener('keydown', function(e) {
