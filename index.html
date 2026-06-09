@@ -439,7 +439,7 @@
             const data = await totsRes.value.json();
             var tots = data.tots || [];
             tots.forEach(function(item) {
-              if (item.thought && item.pinned === 1) {
+              if (item.thought && Number(item.pinned) === 1) {
                 items.push(createPinnedTot(item.thought, item.tags || '', item.date || ''));
               }
             });
@@ -450,7 +450,7 @@
             const data = await galleryRes.value.json();
             var gallery = data.gallery || [];
             gallery.forEach(function(item) {
-              if (item.url && item.pinned === 1) {
+              if (item.url && Number(item.pinned) === 1) {
                 var type = (item.type || 'photo').toLowerCase().trim();
                 if (type === 'video') {
                   items.push(createPinnedGalleryVideo(item.url, item.caption || ''));
@@ -466,7 +466,7 @@
             const data = await musicRes.value.json();
             var music = data.music || [];
             music.forEach(function(item) {
-              if (item.title && item.url && item.pinned === 1) {
+              if (item.title && item.url && Number(item.pinned) === 1) {
                 var type = (item.type || '').toLowerCase().trim();
                 var platform = (item.platform || '').toLowerCase().trim();
                 var card = createPinnedMusic(item.title, item.url, type, platform);
@@ -480,7 +480,7 @@
             const data = await videosRes.value.json();
             var videos = data.videos || [];
             videos.forEach(function(item) {
-              if (item.video_url && item.pinned === 1) {
+              if (item.video_url && Number(item.pinned) === 1) {
                 var card = createPinnedVideo(item.video_url, item.title || '', item.caption || '');
                 if (card) items.push(card);
               }
