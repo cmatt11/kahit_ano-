@@ -24,6 +24,7 @@
         <li><a href="videos.html">Videos</a></li>
         <li><a href="echo.html">Echo</a></li>
         <li><a href="sidequests.html">Side Quests</a></li>
+        <li><a href="pixel.html">Pixel</a></li>
         <li><a href="links.html">Links</a></li>
       </ul>
     </div>
@@ -38,6 +39,14 @@
         <a href="sidequests.html" class="btn btn-primary" data-en="Explore my side quests">Explore my side quests</a>
         <a href="echo.html" class="btn btn-secondary" data-en="Try the Echo Chamber">Try the Echo Chamber</a>
       </div>
+    </div>
+  </section>
+
+  <!-- Daily Rotation -->
+  <section class="section daily-section" id="daily-section" style="display: none;">
+    <div class="daily-card fade-in" id="daily-card">
+      <span class="daily-label" id="daily-label">today</span>
+      <div class="daily-body" id="daily-body"></div>
     </div>
   </section>
 
@@ -94,6 +103,13 @@
         <span class="preview-link">Watch &rarr;</span>
       </a>
 
+      <a href="bookshelf.html" class="preview-card fade-in">
+        <div class="preview-emoji">📚</div>
+        <h3>Bookshelf</h3>
+        <p data-en="Books I'm reading, already finished, or want to start. There's a 3D shelf and a built-in reader.">Mga librong binabasa ko, tapos na, o balak kong simulan. May 3D shelf at built-in reader pa.</p>
+        <span class="preview-link">Browse the shelf &rarr;</span>
+      </a>
+
       <a href="sidequests.html" class="preview-card fade-in">
         <div class="preview-emoji">🎯</div>
         <h3>Side Quests</h3>
@@ -118,6 +134,107 @@
   <script src="cms-config.js"></script>
   <script src="script.js"></script>
   <script src="translate.js"></script>
+
+  <script>
+    // Daily Rotation - one subtle thing that changes each day.
+    (function() {
+      function ytId(url) {
+        var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\s]+)/);
+        return m ? m[1] : null;
+      }
+
+      function convertImageUrl(url) {
+        if (!url) return '';
+        if (url.startsWith('/cdn/')) return 'https://kahitanocs.ochina1123.workers.dev' + url;
+        var d = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+        if (d) return 'https://lh3.googleusercontent.com/d/' + d[1];
+        var o = url.match(/drive\.google\.com\/open\?id=([^&\?]+)/);
+        if (o) return 'https://lh3.googleusercontent.com/d/' + o[1];
+        return url;
+      }
+
+      function render(item) {
+        var section = document.getElementById('daily-section');
+        var labelEl = document.getElementById('daily-label');
+        var body = document.getElementById('daily-body');
+        if (!item || !item.content) return;
+
+        var type = item.type || 'word';
+        labelEl.textContent = item.label || ({
+          word: 'word of the day',
+          quote: 'today\u2019s line',
+          color: 'color of the day',
+          song: 'song of the day',
+          photo: 'photo of the day'
+        })[type] || 'today';
+
+        if (type === 'color') {
+          var hex = item.content;
+          body.innerHTML = '';
+          var swatch = document.createElement('div');
+          swatch.className = 'daily-color-swatch';
+          swatch.style.background = hex;
+          var code = document.createElement('span');
+          code.className = 'daily-color-code';
+          code.textContent = hex;
+          body.appendChild(swatch);
+          body.appendChild(code);
+          // Subtle touch: tint the card's underline with today's color.
+          document.getElementById('daily-card').style.setProperty('--daily-accent', hex);
+        } else if (type === 'photo') {
+          body.innerHTML = '';
+          var img = document.createElement('img');
+          img.className = 'daily-photo';
+          img.src = convertImageUrl(item.content);
+          img.alt = item.label || 'Photo of the day';
+          img.loading = 'lazy';
+          body.appendChild(img);
+        } else if (type === 'song') {
+          body.innerHTML = '';
+          var id = ytId(item.content);
+          if (id) {
+            var iframe = document.createElement('iframe');
+            iframe.className = 'daily-song';
+            iframe.src = 'https://www.youtube.com/embed/' + id;
+            iframe.setAttribute('frameborder', '0');
+            iframe.setAttribute('allow', 'encrypted-media; picture-in-picture');
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.loading = 'lazy';
+            body.appendChild(iframe);
+          } else if (item.content.indexOf('spotify.com') !== -1) {
+            var sframe = document.createElement('iframe');
+            sframe.className = 'daily-song';
+            sframe.src = item.content.replace('open.spotify.com/', 'open.spotify.com/embed/');
+            sframe.setAttribute('allow', 'encrypted-media');
+            sframe.loading = 'lazy';
+            body.appendChild(sframe);
+          } else {
+            var a = document.createElement('a');
+            a.href = item.content;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.className = 'daily-song-link';
+            a.textContent = 'listen \u2192';
+            body.appendChild(a);
+          }
+        } else {
+          // word or quote
+          var p = document.createElement('p');
+          p.className = type === 'quote' ? 'daily-quote' : 'daily-word';
+          p.textContent = item.content;
+          body.innerHTML = '';
+          body.appendChild(p);
+        }
+
+        section.style.display = '';
+      }
+
+      fetch(cmsUrl('daily-rotation'))
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(data) { if (data && data.item) render(data.item); })
+        .catch(function() {});
+    })();
+  </script>
 
   <script>
     // Fortune Cookie Generator
