@@ -533,15 +533,21 @@
           const scale = calculateScale(page);
           const pdfViewport = page.getViewport({ scale: scale });
 
+          // Render at higher resolution for crisp text on high-DPI screens
+          const pixelRatio = Math.min(window.devicePixelRatio || 1, 2.5);
+          const hiResViewport = page.getViewport({ scale: scale * pixelRatio });
+
           const wrapper = document.createElement('div');
           wrapper.className = 'page-wrapper';
 
           const canvas = document.createElement('canvas');
-          canvas.width = pdfViewport.width;
-          canvas.height = pdfViewport.height;
+          canvas.width = hiResViewport.width;
+          canvas.height = hiResViewport.height;
+          canvas.style.width = pdfViewport.width + 'px';
+          canvas.style.height = pdfViewport.height + 'px';
 
           const ctx = canvas.getContext('2d');
-          await page.render({ canvasContext: ctx, viewport: pdfViewport }).promise;
+          await page.render({ canvasContext: ctx, viewport: hiResViewport }).promise;
 
           // Dog-ear bookmark indicator
           const dogEar = document.createElement('div');

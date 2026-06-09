@@ -1254,11 +1254,9 @@
 
         if (book.file_url) {
           var fileLink = convertFileUrl(book.file_url);
-          var isPdf = fileLink.toLowerCase().indexOf('.pdf') !== -1 || fileLink.toLowerCase().indexOf('application/pdf') !== -1;
-          if (isPdf) {
-            var readerLink = 'reader.html?url=' + encodeURIComponent(fileLink) + '&title=' + encodeURIComponent(book.title || 'Untitled') + '&id=' + encodeURIComponent(book.id);
-            html += '<a href="' + escapeHtml(readerLink) + '" class="book-file-link">read it here &rarr;</a>';
-          } else {
+          var readerLink = 'reader.html?url=' + encodeURIComponent(fileLink) + '&title=' + encodeURIComponent(book.title || 'Untitled') + '&id=' + encodeURIComponent(book.id);
+          html += '<a href="' + escapeHtml(readerLink) + '" class="book-file-link">read it here &rarr;</a>';
+          if (false) {
             html += '<a href="' + escapeHtml(fileLink) + '" target="_blank" rel="noopener noreferrer" class="book-file-link">get the book here &rarr;</a>';
           }
         }
