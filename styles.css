@@ -814,11 +814,88 @@ img {
   padding-top: 2rem;
 }
 
+/* Dropdown toggle button */
+.pinned-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  background: var(--white);
+  border: 1px solid var(--brown-lighter);
+  border-radius: 30px;
+  padding: 0.9rem 1.5rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--brown);
+  transition: all var(--transition);
+}
+
+.pinned-toggle:hover {
+  border-color: var(--pink);
+  box-shadow: 0 6px 18px var(--shadow);
+}
+
+.pinned-count {
+  color: var(--pink-dark);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.pinned-chevron {
+  color: var(--brown-light);
+  font-size: 0.9rem;
+  transition: transform var(--transition);
+}
+
+.pinned-section.pinned-open .pinned-chevron {
+  transform: rotate(180deg);
+}
+
+/* Collapsible area, closed by default */
+.pinned-collapse {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+}
+
+.pinned-section.pinned-open .pinned-collapse {
+  max-height: 8000px;
+}
+
+.pinned-subtitle {
+  text-align: center;
+  color: var(--brown-light);
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
 .pinned-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
+}
+
+/* Source link on each pinned card */
+.pinned-source-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--pink-dark);
+  transition: color var(--transition);
+}
+
+.pinned-source-link:hover {
+  color: var(--brown);
+}
+
+.pinned-clickable {
+  cursor: pointer;
 }
 
 .pinned-item {

@@ -42,11 +42,14 @@
 
   <!-- Pinned Section -->
   <section class="section pinned-section" id="pinned-section" style="display: none;">
-    <div class="section-header fade-in">
-      <h2>Pinned 📌</h2>
-      <p data-en="Stuff I want you to see first. You're welcome.">Mga bagay na gusto kong makita mo agad. De wala lang haha</p>
+    <button class="pinned-toggle" id="pinned-toggle" aria-expanded="false">
+      <span class="pinned-toggle-label">Pinned 📌 <span class="pinned-count" id="pinned-count"></span></span>
+      <span class="pinned-chevron" id="pinned-chevron">&#9662;</span>
+    </button>
+    <div class="pinned-collapse" id="pinned-collapse">
+      <p class="pinned-subtitle" data-en="Stuff I want you to see first. You're welcome.">Mga bagay na gusto kong makita mo agad. De wala lang haha</p>
+      <div class="pinned-grid" id="pinned-grid"></div>
     </div>
-    <div class="pinned-grid" id="pinned-grid"></div>
   </section>
 
   <!-- Preview Sections -->
@@ -168,6 +171,25 @@
         return value && value.trim().toLowerCase() === 'p';
       }
 
+      // Adds a "open in [section]" link to a pinned card.
+      // For cards without interactive embeds, also makes the whole card clickable.
+      function addSourceLink(card, href, label, fullClickable) {
+        const link = document.createElement('a');
+        link.className = 'pinned-source-link';
+        link.href = href;
+        link.innerHTML = label + ' &rarr;';
+        card.appendChild(link);
+
+        if (fullClickable) {
+          card.classList.add('pinned-clickable');
+          card.addEventListener('click', function(e) {
+            // Don't double-navigate if the link itself was clicked
+            if (e.target.closest('.pinned-source-link')) return;
+            window.location.href = href;
+          });
+        }
+      }
+
       // --- Tot card ---
       function createPinnedTot(thought, tags, date) {
         const card = document.createElement('div');
@@ -204,6 +226,7 @@
         }
 
         card.appendChild(inner);
+        addSourceLink(card, 'tots.html', 'open in tots', true);
         return card;
       }
 
@@ -262,6 +285,7 @@
         }
 
         card.appendChild(inner);
+        addSourceLink(card, 'gallery.html', 'open in gallery', true);
         return card;
       }
 
@@ -308,6 +332,7 @@
         }
 
         card.appendChild(inner);
+        addSourceLink(card, 'gallery.html', 'open in gallery', false);
         return card;
       }
 
@@ -383,6 +408,7 @@
         inner.appendChild(iframe);
 
         card.appendChild(inner);
+        addSourceLink(card, 'music.html', 'open in music', false);
         return card;
       }
 
@@ -473,6 +499,21 @@
               grid.appendChild(item);
             });
             observeFadeIn(items);
+
+            // Set the count in the toggle label
+            const countEl = document.getElementById('pinned-count');
+            if (countEl) countEl.textContent = '(' + items.length + ')';
+
+            // Wire up the collapsible dropdown
+            const toggle = document.getElementById('pinned-toggle');
+            const collapse = document.getElementById('pinned-collapse');
+            const chevron = document.getElementById('pinned-chevron');
+            if (toggle && collapse) {
+              toggle.addEventListener('click', function() {
+                const isOpen = section.classList.toggle('pinned-open');
+                toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+              });
+            }
           }
 
         } catch (err) {
