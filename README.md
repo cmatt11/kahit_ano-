@@ -7,9 +7,9 @@ Carla's personal corner of the internet. A static website that's part blog, part
 - **Home** (`index.html`) - Landing page with previews of everything
 - **Mga Tots Ko** (`tots.html`) - Blog-style thoughts with Tagalog flair
 - **Music** (`music.html`) - Embedded Spotify playlists and YouTube music
-- **Photos** (`photos.html`) - Pinterest-style gallery (placeholders for now)
+- **Gallery** (`gallery.html`) - Pinterest-style grid for photos and videos from Google Sheets
 - **Videos** (`videos.html`) - Favorite clips and comfort videos
-- **About** (`about.html`) - The deeper intro
+- **Side Quests** (`sidequests.html`) - Random interests and hobbies
 - **Links** (`links.html`) - Portfolio and social links
 
 ## Tech
