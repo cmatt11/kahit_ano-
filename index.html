@@ -179,6 +179,7 @@
       // --- Gallery item ---
       function convertImageUrl(url) {
         if (!url) return '';
+        if (url.startsWith('/cdn/')) return 'https://kahitanocs.ochina1123.workers.dev' + url;
         const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
         if (driveFileMatch) return 'https://lh3.googleusercontent.com/d/' + driveFileMatch[1];
         const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([^&\?]+)/);
@@ -260,14 +261,21 @@
         const youtubeId = getYouTubeVideoId(url);
         if (youtubeId) {
           iframe.src = 'https://www.youtube.com/embed/' + youtubeId;
+          embedWrapper.appendChild(iframe);
         } else {
           const driveId = getDriveVideoId(url);
           if (driveId) {
             iframe.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
+            embedWrapper.appendChild(iframe);
+          } else if (url.startsWith('/cdn/')) {
+            const video = document.createElement('video');
+            video.src = 'https://kahitanocs.ochina1123.workers.dev' + url;
+            video.controls = true;
+            video.style.width = '100%';
+            video.style.borderRadius = '8px';
+            embedWrapper.appendChild(video);
           }
         }
-
-        embedWrapper.appendChild(iframe);
         inner.appendChild(embedWrapper);
 
         if (caption) {
