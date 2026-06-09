@@ -588,7 +588,8 @@
         }
 
         if (book.file_url) {
-          html += '<a href="' + convertFileUrl(book.file_url) + '" target="_blank" rel="noopener noreferrer" class="book-file-link">get the book here &rarr;</a>';
+          var readerUrl = 'reader.html?url=' + encodeURIComponent(convertFileUrl(book.file_url)) + '&title=' + encodeURIComponent(book.title || 'Untitled');
+          html += '<a href="' + readerUrl + '" class="book-file-link">get the book here &rarr;</a>';
         }
 
         panel.innerHTML = html;
