@@ -1,6 +1,6 @@
 const CMS_CONFIG = {
   baseUrl: 'https://kahitanocs.ochina1123.workers.dev/api/public',
-  userId: 'PLACEHOLDER_USER_ID'
+  userId: '771beace-54cc-46ed-9204-770915f16348'
 };
 
 function cmsUrl(resource) {
