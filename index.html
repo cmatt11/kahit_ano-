@@ -117,6 +117,7 @@
       const TOTS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1-L_RdSX8rsLNTGWaF1Agi-U9Bhd7qmWdHXPYZxXm9lG8H32cl-t5urFSOVuKORHE9EynIgQ6n_i3/pub?output=csv';
       const GALLERY_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQBmQDQVE4_hp-ggUu8KWsSrCvz7x1YQtWO_mIOSbp47WEuDkV__qvS77u1D3_zvuypTDv_MypUS5MM/pub?output=csv';
       const MUSIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQSkHiIJi2oFsV8BE7KOC67luuWHntXXH8JNDS3-XKms_RyhoHmvMNyBPD6HTVhDD5sN48pXCnnYVhw/pub?output=csv';
+      const VIDEOS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQluR27ryW3DGi7yG3d1UKWDPQejn7elBGyKtGadwmq4gQ5w82PiZ2-ZIyxbRbLgUvMbJBbX7zcBuoR/pub?output=csv';
 
       function parseCSV(csvText) {
         const rows = [];
@@ -414,6 +415,55 @@
         return card;
       }
 
+      // --- Video item ---
+      function createPinnedVideo(videoUrl, title, caption) {
+        const videoId = getYouTubeVideoId(videoUrl);
+        if (!videoId) return null;
+
+        const card = document.createElement('div');
+        card.className = 'pinned-item pinned-video fade-in';
+
+        const badge = document.createElement('span');
+        badge.className = 'pin-badge';
+        badge.textContent = '📌';
+        card.appendChild(badge);
+
+        const inner = document.createElement('div');
+        inner.className = 'video-card';
+
+        const embedDiv = document.createElement('div');
+        embedDiv.className = 'video-embed';
+
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://www.youtube.com/embed/' + videoId;
+        iframe.title = title || 'Video';
+        iframe.frameBorder = '0';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+
+        embedDiv.appendChild(iframe);
+        inner.appendChild(embedDiv);
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'video-info';
+
+        if (title) {
+          const h3 = document.createElement('h3');
+          h3.textContent = title;
+          infoDiv.appendChild(h3);
+        }
+        if (caption) {
+          const p = document.createElement('p');
+          p.textContent = caption;
+          infoDiv.appendChild(p);
+        }
+
+        inner.appendChild(infoDiv);
+        card.appendChild(inner);
+        addSourceLink(card, 'videos.html', false);
+        return card;
+      }
+
       // --- Fade in observer ---
       function observeFadeIn(elements) {
         const observer = new IntersectionObserver(function(entries) {
@@ -434,10 +484,11 @@
         const items = [];
 
         try {
-          const [totsRes, galleryRes, musicRes] = await Promise.allSettled([
+          const [totsRes, galleryRes, musicRes, videosRes] = await Promise.allSettled([
             fetch(TOTS_CSV),
             fetch(GALLERY_CSV),
-            fetch(MUSIC_CSV)
+            fetch(MUSIC_CSV),
+            fetch(VIDEOS_CSV)
           ]);
 
           // Process Tots (columns: thought, tags, date, pinned)
@@ -489,6 +540,23 @@
               const pinned = row[4] || '';
               if (title && url && isPinned(pinned)) {
                 const card = createPinnedMusic(title, url, type, platform);
+                if (card) items.push(card);
+              }
+            });
+          }
+
+          // Process Videos (columns: video url, title, caption, pinned)
+          if (videosRes.status === 'fulfilled' && videosRes.value.ok) {
+            const csv = await videosRes.value.text();
+            const rows = parseCSV(csv);
+            if (rows.length > 0) rows.shift();
+            rows.forEach(function(row) {
+              const videoUrl = row[0] || '';
+              const title = row[1] || '';
+              const caption = row[2] || '';
+              const pinned = row[3] || '';
+              if (videoUrl && isPinned(pinned)) {
+                const card = createPinnedVideo(videoUrl, title, caption);
                 if (card) items.push(card);
               }
             });
