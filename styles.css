@@ -159,6 +159,17 @@ img {
   transform: translateY(0);
 }
 
+/* Invisible bridge across the gap so moving the cursor from the
+   "More" label down to the dropdown does not drop the hover. */
+.nav-more-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -0.6rem;
+  left: 0;
+  right: 0;
+  height: 0.6rem;
+}
+
 .nav-more-dropdown a {
   display: block;
   padding: 0.5rem 0.8rem;
