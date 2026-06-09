@@ -6,6 +6,428 @@
   <title>Bookshelf - Carla</title>
   <link rel="stylesheet" href="styles.css">
   <style>
+    /* Theme System */
+    body.theme-warm {
+      --shelf-bg: var(--cream);
+      --shelf-plank-start: #a0522d;
+      --shelf-plank-mid: #8B4513;
+      --shelf-plank-end: #6b3410;
+      --panel-bg: var(--cream);
+      --panel-border: var(--brown-lighter);
+      --text-primary: var(--brown);
+      --text-secondary: var(--brown-light);
+      --log-bg: var(--cream);
+    }
+
+    body.theme-dark {
+      --shelf-bg: #1a1210;
+      --shelf-plank-start: #3d2518;
+      --shelf-plank-mid: #2c1a10;
+      --shelf-plank-end: #1f120a;
+      --panel-bg: #2a1f18;
+      --panel-border: #4a3528;
+      --text-primary: #e8d5c4;
+      --text-secondary: #b68973;
+      --log-bg: #2a1f18;
+    }
+
+    body.theme-dark {
+      background-color: var(--shelf-bg) !important;
+      color: var(--text-primary);
+    }
+
+    body.theme-dark .page-header h1,
+    body.theme-dark .currently-reading h2,
+    body.theme-dark .bookshelf-container h2,
+    body.theme-dark .reading-log h2 {
+      color: var(--text-primary);
+    }
+
+    body.theme-dark .page-header p,
+    body.theme-dark .reading-author,
+    body.theme-dark .log-author,
+    body.theme-dark .log-dates {
+      color: var(--text-secondary);
+    }
+
+    body.theme-dark .reading-title,
+    body.theme-dark .log-title {
+      color: var(--text-primary);
+    }
+
+    body.theme-dark .book-info-panel {
+      background: var(--panel-bg);
+      border-color: var(--panel-border);
+    }
+
+    body.theme-dark .book-info-panel h3 {
+      color: var(--text-primary);
+    }
+
+    body.theme-dark .book-info-panel .book-author,
+    body.theme-dark .book-info-panel .book-review {
+      color: var(--text-secondary);
+    }
+
+    body.theme-dark .log-item {
+      background: var(--log-bg);
+      border-color: var(--panel-border);
+    }
+
+    body.theme-dark .log-review {
+      color: var(--text-secondary);
+    }
+
+    body.theme-dark .nav {
+      background: #1f150f;
+      border-bottom-color: #3d2a1e;
+    }
+
+    body.theme-dark .footer {
+      color: var(--text-secondary);
+    }
+
+    body.theme-minimal {
+      --shelf-bg: #f8f9fa;
+      --shelf-plank-start: #dee2e6;
+      --shelf-plank-mid: #ced4da;
+      --shelf-plank-end: #adb5bd;
+      --panel-bg: #ffffff;
+      --panel-border: #e9ecef;
+      --text-primary: #212529;
+      --text-secondary: #6c757d;
+      --log-bg: #ffffff;
+    }
+
+    body.theme-minimal {
+      background-color: var(--shelf-bg) !important;
+      color: var(--text-primary);
+    }
+
+    body.theme-minimal .page-header h1,
+    body.theme-minimal .currently-reading h2,
+    body.theme-minimal .bookshelf-container h2,
+    body.theme-minimal .reading-log h2 {
+      color: var(--text-primary);
+    }
+
+    body.theme-minimal .page-header p,
+    body.theme-minimal .reading-author,
+    body.theme-minimal .log-author,
+    body.theme-minimal .log-dates {
+      color: var(--text-secondary);
+    }
+
+    body.theme-minimal .reading-title,
+    body.theme-minimal .log-title {
+      color: var(--text-primary);
+    }
+
+    body.theme-minimal .book-info-panel {
+      background: var(--panel-bg);
+      border-color: var(--panel-border);
+    }
+
+    body.theme-minimal .book-info-panel h3 {
+      color: var(--text-primary);
+    }
+
+    body.theme-minimal .book-info-panel .book-author,
+    body.theme-minimal .book-info-panel .book-review {
+      color: var(--text-secondary);
+    }
+
+    body.theme-minimal .log-item {
+      background: var(--log-bg);
+      border-color: var(--panel-border);
+    }
+
+    body.theme-minimal .log-review {
+      color: var(--text-secondary);
+    }
+
+    body.theme-minimal .shelf-plank {
+      background: linear-gradient(to bottom, var(--shelf-plank-start) 0%, var(--shelf-plank-mid) 40%, var(--shelf-plank-end) 100%) !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08), inset 0 -2px 3px rgba(0,0,0,0.05) !important;
+    }
+
+    body.theme-dark .shelf-plank {
+      background: linear-gradient(to bottom, var(--shelf-plank-start) 0%, var(--shelf-plank-mid) 40%, var(--shelf-plank-end) 100%) !important;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 -2px 3px rgba(0,0,0,0.3) !important;
+    }
+
+    /* Theme Switcher */
+    .theme-switcher {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theme-switcher-label {
+      font-size: 0.7rem;
+      color: var(--brown-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    body.theme-dark .theme-switcher-label {
+      color: var(--text-secondary);
+    }
+
+    body.theme-minimal .theme-switcher-label {
+      color: var(--text-secondary);
+    }
+
+    .theme-pill {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .theme-pill:hover {
+      transform: scale(1.15);
+    }
+
+    .theme-pill.active {
+      border-color: var(--brown);
+      box-shadow: 0 0 0 2px rgba(92, 61, 46, 0.2);
+    }
+
+    body.theme-dark .theme-pill.active {
+      border-color: #c49b70;
+      box-shadow: 0 0 0 2px rgba(196, 155, 112, 0.3);
+    }
+
+    body.theme-minimal .theme-pill.active {
+      border-color: #495057;
+      box-shadow: 0 0 0 2px rgba(73, 80, 87, 0.2);
+    }
+
+    .theme-pill-warm {
+      background: linear-gradient(135deg, #8B4513, #c49b70);
+    }
+
+    .theme-pill-dark {
+      background: linear-gradient(135deg, #1a1210, #3d2518);
+    }
+
+    .theme-pill-minimal {
+      background: linear-gradient(135deg, #f8f9fa, #ced4da);
+    }
+
+    /* Header Controls Row */
+    .header-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 0.8rem;
+    }
+
+    /* Reading Streak */
+    .streak-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(92, 61, 46, 0.08);
+      padding: 0.3rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--brown);
+      transition: background 0.2s ease;
+    }
+
+    body.theme-dark .streak-badge {
+      background: rgba(196, 155, 112, 0.12);
+      color: #e8c9a0;
+    }
+
+    body.theme-minimal .streak-badge {
+      background: rgba(0, 0, 0, 0.05);
+      color: #495057;
+    }
+
+    .streak-badge:hover {
+      background: rgba(92, 61, 46, 0.14);
+    }
+
+    /* Overlay (Ambient Reading Mode) */
+    .bookshelf-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 90;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      cursor: pointer;
+    }
+
+    .bookshelf-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Book Info Panel - elevated above overlay */
+    .book-info-panel {
+      background: var(--cream);
+      border: 1px solid var(--brown-lighter);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      display: none;
+      animation: slideDown 0.3s ease;
+      position: relative;
+      z-index: 95;
+    }
+
+    .book-info-panel.visible {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .book-info-panel h3 {
+      font-size: 1.2rem;
+      color: var(--brown);
+      margin-bottom: 0.3rem;
+    }
+
+    .book-info-panel .book-author {
+      font-size: 0.95rem;
+      color: var(--brown-light);
+      margin-bottom: 0.8rem;
+    }
+
+    .book-info-panel .book-review {
+      font-style: italic;
+      color: var(--brown);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .book-info-panel .book-file-link {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: var(--brown);
+      color: var(--white);
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: background 0.2s ease;
+    }
+
+    .book-info-panel .book-file-link:hover {
+      background: var(--brown-light);
+    }
+
+    body.theme-dark .book-info-panel .book-file-link {
+      background: #5a3e2a;
+      color: #e8d5c4;
+    }
+
+    body.theme-dark .book-info-panel .book-file-link:hover {
+      background: #7a5c3e;
+    }
+
+    body.theme-minimal .book-info-panel .book-file-link {
+      background: #495057;
+      color: #fff;
+    }
+
+    body.theme-minimal .book-info-panel .book-file-link:hover {
+      background: #6c757d;
+    }
+
+    /* Bookmark Toggle Button */
+    .bookmark-toggle-btn {
+      display: inline-block;
+      margin-left: 0.8rem;
+      padding: 0.4rem 0.9rem;
+      background: transparent;
+      border: 1px solid var(--brown-lighter);
+      color: var(--brown);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .bookmark-toggle-btn:hover {
+      background: var(--brown-lighter);
+    }
+
+    .bookmark-toggle-btn.bookmarked {
+      background: var(--brown);
+      color: var(--white);
+      border-color: var(--brown);
+    }
+
+    body.theme-dark .bookmark-toggle-btn {
+      border-color: #4a3528;
+      color: var(--text-primary);
+    }
+
+    body.theme-dark .bookmark-toggle-btn:hover {
+      background: #3d2a1e;
+    }
+
+    body.theme-dark .bookmark-toggle-btn.bookmarked {
+      background: #5a3e2a;
+      color: #e8d5c4;
+      border-color: #5a3e2a;
+    }
+
+    body.theme-minimal .bookmark-toggle-btn {
+      border-color: #dee2e6;
+      color: var(--text-primary);
+    }
+
+    body.theme-minimal .bookmark-toggle-btn:hover {
+      background: #e9ecef;
+    }
+
+    body.theme-minimal .bookmark-toggle-btn.bookmarked {
+      background: #495057;
+      color: #fff;
+      border-color: #495057;
+    }
+
+    /* Dog-ear Bookmark on Spine */
+    .book-spine .dog-ear {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 14px 14px 0;
+      border-color: transparent #fdf8f4 transparent transparent;
+      z-index: 2;
+      filter: drop-shadow(-1px 1px 1px rgba(0,0,0,0.2));
+    }
+
+    body.theme-dark .book-spine .dog-ear {
+      border-color: transparent #1a1210 transparent transparent;
+    }
+
+    body.theme-minimal .book-spine .dog-ear {
+      border-color: transparent #f8f9fa transparent transparent;
+    }
+
     /* Currently Reading Section */
     .currently-reading {
       margin-bottom: 3rem;
@@ -157,7 +579,7 @@
       transform-origin: bottom left;
       box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .book-spine:hover {
@@ -192,60 +614,6 @@
       width: 4px;
       height: 100%;
       background: rgba(0,0,0,0.15);
-    }
-
-    /* Book Info Panel */
-    .book-info-panel {
-      background: var(--cream);
-      border: 1px solid var(--brown-lighter);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-top: 1.5rem;
-      display: none;
-      animation: slideDown 0.3s ease;
-    }
-
-    .book-info-panel.visible {
-      display: block;
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .book-info-panel h3 {
-      font-size: 1.2rem;
-      color: var(--brown);
-      margin-bottom: 0.3rem;
-    }
-
-    .book-info-panel .book-author {
-      font-size: 0.95rem;
-      color: var(--brown-light);
-      margin-bottom: 0.8rem;
-    }
-
-    .book-info-panel .book-review {
-      font-style: italic;
-      color: var(--brown);
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-
-    .book-info-panel .book-file-link {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      background: var(--brown);
-      color: var(--white);
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: background 0.2s ease;
-    }
-
-    .book-info-panel .book-file-link:hover {
-      background: var(--brown-light);
     }
 
     /* Reading Log */
@@ -355,10 +723,18 @@
       .reading-cover-placeholder {
         height: 180px;
       }
+
+      .header-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
-<body>
+<body class="theme-warm">
+  <!-- Ambient Overlay -->
+  <div class="bookshelf-overlay" id="bookshelf-overlay"></div>
+
   <!-- Navigation -->
   <nav class="nav">
     <div class="nav-inner">
@@ -385,6 +761,17 @@
   <header class="page-header">
     <h1>Bookshelf &#128218;</h1>
     <p>my reading list na walang consistent genre, tbh.</p>
+    <div class="header-controls">
+      <div class="streak-badge" id="streak-badge" title="Your reading streak - keep visiting!">
+        &#128293; <span id="streak-count">1</span>
+      </div>
+      <div class="theme-switcher">
+        <span class="theme-switcher-label">vibe:</span>
+        <div class="theme-pill theme-pill-warm active" id="theme-warm" title="Warm Wood" data-theme="warm"></div>
+        <div class="theme-pill theme-pill-dark" id="theme-dark" title="Dark Library" data-theme="dark"></div>
+        <div class="theme-pill theme-pill-minimal" id="theme-minimal" title="Minimalist" data-theme="minimal"></div>
+      </div>
+    </div>
   </header>
 
   <!-- Currently Reading -->
@@ -416,6 +803,139 @@
       var books = [];
       var activeBookId = null;
 
+      // ====== READING STREAK TRACKER ======
+      function updateStreak() {
+        var today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        var lastVisit = localStorage.getItem('bookshelf_lastVisitDate');
+        var streak = parseInt(localStorage.getItem('bookshelf_streakCount'), 10) || 0;
+
+        if (!lastVisit) {
+          // First visit ever
+          streak = 1;
+        } else if (lastVisit === today) {
+          // Already counted today, do nothing
+        } else {
+          // Check if yesterday
+          var lastDate = new Date(lastVisit + 'T00:00:00');
+          var todayDate = new Date(today + 'T00:00:00');
+          var diffDays = Math.round((todayDate - lastDate) / (1000 * 60 * 60 * 24));
+
+          if (diffDays === 1) {
+            streak++;
+          } else {
+            // More than 1 day gap - reset
+            streak = 1;
+          }
+        }
+
+        localStorage.setItem('bookshelf_lastVisitDate', today);
+        localStorage.setItem('bookshelf_streakCount', streak.toString());
+
+        document.getElementById('streak-count').textContent = streak;
+      }
+
+      updateStreak();
+
+      // ====== SHELF THEME SWITCHER ======
+      function applyShelfTheme(theme) {
+        document.body.classList.remove('theme-warm', 'theme-dark', 'theme-minimal');
+        document.body.classList.add('theme-' + theme);
+
+        // Update pill active states
+        document.querySelectorAll('.theme-pill').forEach(function(pill) {
+          pill.classList.remove('active');
+        });
+        var activePill = document.getElementById('theme-' + theme);
+        if (activePill) activePill.classList.add('active');
+
+        localStorage.setItem('bookshelf_theme', theme);
+      }
+
+      // Load saved theme
+      var savedTheme = localStorage.getItem('bookshelf_theme') || 'warm';
+      applyShelfTheme(savedTheme);
+
+      // Theme pill click handlers
+      document.querySelectorAll('.theme-pill').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+          var theme = this.getAttribute('data-theme');
+          applyShelfTheme(theme);
+        });
+      });
+
+      // ====== DOG-EAR BOOKMARKS ======
+      function getBookmarks() {
+        try {
+          return JSON.parse(localStorage.getItem('bookshelf_bookmarks') || '[]');
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveBookmarks(bookmarks) {
+        localStorage.setItem('bookshelf_bookmarks', JSON.stringify(bookmarks));
+      }
+
+      function isBookmarked(bookId) {
+        return getBookmarks().indexOf(bookId) !== -1;
+      }
+
+      function toggleBookmark(bookId) {
+        var bookmarks = getBookmarks();
+        var idx = bookmarks.indexOf(bookId);
+        if (idx !== -1) {
+          bookmarks.splice(idx, 1);
+        } else {
+          bookmarks.push(bookId);
+        }
+        saveBookmarks(bookmarks);
+        applyDogEars();
+        return bookmarks.indexOf(bookId) !== -1;
+      }
+
+      function applyDogEars() {
+        var bookmarks = getBookmarks();
+        // Remove all existing dog-ears
+        document.querySelectorAll('.book-spine .dog-ear').forEach(function(ear) {
+          ear.remove();
+        });
+        // Add dog-ears to bookmarked spines
+        document.querySelectorAll('.book-spine[data-book-id]').forEach(function(spine) {
+          var bookId = spine.getAttribute('data-book-id');
+          if (bookmarks.indexOf(bookId) !== -1) {
+            var ear = document.createElement('div');
+            ear.className = 'dog-ear';
+            spine.appendChild(ear);
+          }
+        });
+      }
+
+      // ====== AMBIENT OVERLAY ======
+      var overlay = document.getElementById('bookshelf-overlay');
+
+      overlay.addEventListener('click', function() {
+        closeInfoPanel();
+      });
+
+      function showOverlay() {
+        overlay.classList.add('visible');
+      }
+
+      function hideOverlay() {
+        overlay.classList.remove('visible');
+      }
+
+      function closeInfoPanel() {
+        var panel = document.getElementById('book-info-panel');
+        panel.classList.remove('visible');
+        document.querySelectorAll('.book-spine.active').forEach(function(el) {
+          el.classList.remove('active');
+        });
+        activeBookId = null;
+        hideOverlay();
+      }
+
+      // ====== URL / IMAGE HELPERS ======
       function convertImageUrl(url) {
         if (!url) return '';
         var cmsOrigin = CMS_CONFIG.baseUrl.replace('/api/public', '');
@@ -442,7 +962,7 @@
         return url;
       }
 
-      // Book spine color palette - warm, cozy vibes
+      // Book spine color palette
       var spineColors = [
         '#8B4513', '#A0522D', '#6B3A2A', '#C19A6B', '#4A3728',
         '#7B3F00', '#5C3317', '#D2691E', '#8B6914', '#556B2F',
@@ -474,12 +994,10 @@
           var card = document.createElement('div');
           card.className = 'reading-card fade-in';
 
-          // Bookmark ribbon
           var ribbon = document.createElement('div');
           ribbon.className = 'reading-ribbon';
           card.appendChild(ribbon);
 
-          // Cover
           if (book.cover_image_url) {
             var img = document.createElement('img');
             img.className = 'reading-cover';
@@ -494,13 +1012,11 @@
             card.appendChild(placeholder);
           }
 
-          // Title
           var title = document.createElement('div');
           title.className = 'reading-title';
           title.textContent = book.title || 'Untitled';
           card.appendChild(title);
 
-          // Author
           if (book.author) {
             var author = document.createElement('div');
             author.className = 'reading-author';
@@ -523,7 +1039,6 @@
         var shelfUnit = document.createElement('div');
         shelfUnit.className = 'shelf-unit';
 
-        // Group books into shelves of ~12
         var booksPerShelf = 12;
         for (var i = 0; i < allBooks.length; i += booksPerShelf) {
           var chunk = allBooks.slice(i, i + booksPerShelf);
@@ -534,8 +1049,8 @@
           chunk.forEach(function(book, idx) {
             var spine = document.createElement('div');
             spine.className = 'book-spine';
+            spine.setAttribute('data-book-id', book.id);
             spine.style.background = getSpineColor(i + idx);
-            // Vary height deterministically based on title length for visual stability
             var height = (book.title || '').length % 40 + 130;
             spine.style.minHeight = height + 'px';
 
@@ -551,7 +1066,6 @@
             row.appendChild(spine);
           });
 
-          // Add the wooden plank
           var plank = document.createElement('div');
           plank.className = 'shelf-plank';
 
@@ -560,6 +1074,9 @@
         }
 
         container.appendChild(shelfUnit);
+
+        // Apply dog-ears after rendering
+        applyDogEars();
       }
 
       function toggleBookInfo(book, spineEl) {
@@ -574,6 +1091,7 @@
         if (activeBookId === book.id) {
           panel.classList.remove('visible');
           activeBookId = null;
+          hideOverlay();
           return;
         }
 
@@ -587,15 +1105,40 @@
           html += '<div class="book-review">"' + escapeHtml(book.review) + '"</div>';
         }
 
+        // Action buttons row
+        html += '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.5rem;">';
+
         if (book.file_url) {
-          var readerUrl = 'reader.html?url=' + encodeURIComponent(convertFileUrl(book.file_url)) + '&title=' + encodeURIComponent(book.title || 'Untitled');
-          html += '<a href="' + readerUrl + '" class="book-file-link">get the book here &rarr;</a>';
+          var fileLink = convertFileUrl(book.file_url);
+          html += '<a href="' + escapeHtml(fileLink) + '" target="_blank" rel="noopener noreferrer" class="book-file-link">get the book here &rarr;</a>';
         }
+
+        // Bookmark toggle
+        var isMarked = isBookmarked(book.id);
+        var btnText = isMarked ? 'Bookmarked \u2713' : 'Bookmark \u{1F4D6}';
+        var btnClass = 'bookmark-toggle-btn' + (isMarked ? ' bookmarked' : '');
+        html += '<button class="' + btnClass + '" id="bookmark-btn-' + book.id + '" onclick="window.__toggleBookmark(\'' + book.id + '\')">' + btnText + '</button>';
+
+        html += '</div>';
 
         panel.innerHTML = html;
         panel.classList.add('visible');
+
+        // Show ambient overlay
+        showOverlay();
+
         panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
+
+      // Expose bookmark toggle globally so the onclick in HTML works
+      window.__toggleBookmark = function(bookId) {
+        var nowBookmarked = toggleBookmark(bookId);
+        var btn = document.getElementById('bookmark-btn-' + bookId);
+        if (btn) {
+          btn.textContent = nowBookmarked ? 'Bookmarked \u2713' : 'Bookmark \u{1F4D6}';
+          btn.classList.toggle('bookmarked', nowBookmarked);
+        }
+      };
 
       function renderReadingLog(allBooks) {
         if (allBooks.length === 0) return;
@@ -604,7 +1147,6 @@
         var list = document.getElementById('log-list');
         section.style.display = '';
 
-        // Sort chronologically (most recent first)
         var sorted = allBooks.slice().sort(function(a, b) {
           var dateA = a.date_started || '';
           var dateB = b.date_started || '';
@@ -699,16 +1241,13 @@
             return;
           }
 
-          // Currently reading
           var readingBooks = books.filter(function(b) {
             return (b.status || '').toLowerCase() === 'reading';
           });
           renderCurrentlyReading(readingBooks);
 
-          // Full shelf
           renderBookshelf(books);
 
-          // Reading log
           renderReadingLog(books);
 
         } catch (error) {
