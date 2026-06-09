@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Side Quest - Carla</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">carla</a>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tots.html">Mga Tots</a></li>
+        <li><a href="music.html">Music</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="videos.html">Videos</a></li>
+        <li><a href="sidequests.html">Side Quests</a></li>
+        <li><a href="links.html">Links</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="page-header" id="quest-header">
+    <h1 id="quest-title">Loading...</h1>
+    <p id="quest-description"></p>
+  </header>
+
+  <section class="section">
+    <div id="quest-items" class="tots-grid">
+      <div id="quest-loading" class="tots-loading">
+        <p>Loading quest items...</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
+  </footer>
+
+  <script src="cms-config.js"></script>
+  <script src="script.js"></script>
+  <script src="translate.js"></script>
+  <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var questId = params.get('id');
+
+      if (!questId) {
+        document.getElementById('quest-title').textContent = 'Quest not found';
+        document.getElementById('quest-description').textContent = 'No quest ID provided.';
+        document.getElementById('quest-loading').remove();
+        return;
+      }
+
+      fetch(cmsUrl('side-quests'))
+        .then(function(r) {
+          if (!r.ok) throw new Error('Failed to fetch');
+          return r.json();
+        })
+        .then(function(data) {
+          var quests = data.side_quests || [];
+          var quest = quests.find(function(q) { return q.id === questId; });
+
+          var loading = document.getElementById('quest-loading');
+          if (loading) loading.remove();
+
+          if (!quest) {
+            document.getElementById('quest-title').textContent = 'Quest not found';
+            document.getElementById('quest-description').textContent = 'This quest does not exist or has been deleted.';
+            return;
+          }
+
+          // Set page title and header
+          document.title = quest.title + ' - Carla';
+          document.getElementById('quest-title').textContent = (quest.emoji || '') + ' ' + quest.title;
+          document.getElementById('quest-description').textContent = quest.description || '';
+
+          // Render items
+          var container = document.getElementById('quest-items');
+          var items = quest.items || [];
+
+          if (items.length === 0) {
+            container.innerHTML = '<div class="tots-loading"><p>No items in this quest yet.</p></div>';
+            return;
+          }
+
+          items.forEach(function(item) {
+            var card = document.createElement('div');
+            card.className = 'tot-card fade-in';
+
+            var h3 = document.createElement('h3');
+            h3.style.fontSize = '1.1rem';
+            h3.style.fontWeight = '600';
+            h3.style.color = 'var(--brown)';
+            h3.style.marginBottom = '0.5rem';
+            h3.textContent = item.title || '';
+            card.appendChild(h3);
+
+            if (item.content) {
+              var p = document.createElement('p');
+              p.textContent = item.content;
+              card.appendChild(p);
+            }
+
+            if (item.link) {
+              var link = document.createElement('a');
+              link.href = item.link;
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              link.className = 'preview-link';
+              link.style.display = 'inline-block';
+              link.style.marginTop = '0.75rem';
+              link.innerHTML = 'View &rarr;';
+              card.appendChild(link);
+            }
+
+            container.appendChild(card);
+          });
+
+          // Fade-in observer
+          var cards = container.querySelectorAll('.fade-in');
+          var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.1 });
+          cards.forEach(function(c) { observer.observe(c); });
+        })
+        .catch(function() {
+          var loading = document.getElementById('quest-loading');
+          if (loading) loading.remove();
+          document.getElementById('quest-title').textContent = 'Error';
+          document.getElementById('quest-description').textContent = 'Could not load this quest. Try again later.';
+        });
+    })();
+  </script>
+</body>
+</html>

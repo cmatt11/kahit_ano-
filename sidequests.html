@@ -107,7 +107,7 @@
         container.innerHTML = '';
 
         quests.forEach(function(quest) {
-          var href = pageMap[(quest.title || '').toLowerCase()] || '#';
+          var href = pageMap[(quest.title || '').toLowerCase()] || ('quest.html?id=' + quest.id);
           var card = document.createElement('a');
           card.href = href;
           card.className = 'preview-card fade-in';
