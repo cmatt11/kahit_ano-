@@ -18,10 +18,10 @@
       </button>
       <ul class="nav-links">
         <li><a href="index.html" class="active">Home</a></li>
-        <li><a href="tots.html">Mga Tots</a></li>
         <li><a href="music.html">Music</a></li>
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="videos.html">Videos</a></li>
+        <li><a href="echo.html">Echo</a></li>
         <li><a href="sidequests.html">Side Quests</a></li>
         <li><a href="links.html">Links</a></li>
       </ul>
@@ -35,8 +35,20 @@
       <p data-en="Welcome to my little corner of the internet. This is where I dump my thoughts, share music that hits different, hoard pretty pictures, and basically just exist online. Make yourself at home~">Welcome to my little corner of the internet. This is where I dump my thoughts, share music that hits different, hoard pretty pictures, and basically just exist online. Make yourself at home~</p>
       <div class="hero-cta">
         <a href="sidequests.html" class="btn btn-primary" data-en="Explore my side quests">Explore my side quests</a>
-        <a href="tots.html" class="btn btn-secondary" data-en="Read my thoughts">Read my tots</a>
+        <a href="echo.html" class="btn btn-secondary" data-en="Try the Echo Chamber">Try the Echo Chamber</a>
       </div>
+    </div>
+  </section>
+
+  <!-- Fortune Cookie -->
+  <section class="section fortune-section">
+    <div class="fortune-box fade-in">
+      <h2>Fortune Cookie 🥠</h2>
+      <p class="fortune-sub">because sometimes you just need the universe to say something</p>
+      <div class="fortune-display" id="fortune-display">
+        <p class="fortune-text" id="fortune-text"></p>
+      </div>
+      <button class="btn btn-primary fortune-btn" id="fortune-btn">crack open a fortune 🥠</button>
     </div>
   </section>
 
@@ -60,13 +72,6 @@
     </div>
 
     <div class="preview-row">
-      <a href="tots.html" class="preview-card fade-in">
-        <div class="preview-emoji">💭</div>
-        <h3 data-en="My Thoughts">Mga Tots Ko</h3>
-        <p data-en="Random thoughts, opinions, and stories. Like tweets but longer (sometimes). Just kidding.">Random thoughts, opinions, and kwento. Like tweets but longer (sometimes). Charot.</p>
-        <span class="preview-link">Read more &rarr;</span>
-      </a>
-
       <a href="music.html" class="preview-card fade-in">
         <div class="preview-emoji">🎵</div>
         <h3>Music</h3>
@@ -106,12 +111,53 @@
 
   <!-- Footer -->
   <footer class="footer">
-    <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
+    <p>made with <a href="secret.html" class="footer-heart-link"><span class="footer-heart">&hearts;</span></a> by carla &middot; 2024</p>
   </footer>
 
   <script src="cms-config.js"></script>
   <script src="script.js"></script>
   <script src="translate.js"></script>
+
+  <script>
+    // Fortune Cookie Generator
+    (function() {
+      var fortunes = [
+        "You're overthinking it. Seriously.",
+        "The answer is sleep. Always sleep.",
+        "Hindi mo kailangan ng permission para maging ikaw.",
+        "That thing you're avoiding? It's avoiding you too.",
+        "You already know what to do. You're just scared.",
+        "Wala kang utang na loob sa taong hindi naman nagmamahal sayo.",
+        "Stop scrolling. Drink water.",
+        "The universe is not against you. It's just not paying attention.",
+        "Kung hindi mo alam ang sagot, baka mali yung tanong.",
+        "You're not behind. You're on a sphere, remember?",
+        "3am thoughts are valid but not always true.",
+        "Rest is not a reward. It's a requirement.",
+        "Di lahat ng nawawala, loss.",
+        "You are the plot twist.",
+        "Breathe. You're still here. That counts."
+      ];
+
+      var btn = document.getElementById('fortune-btn');
+      var display = document.getElementById('fortune-display');
+      var text = document.getElementById('fortune-text');
+      var lastIndex = -1;
+
+      btn.addEventListener('click', function() {
+        var index;
+        do {
+          index = Math.floor(Math.random() * fortunes.length);
+        } while (index === lastIndex && fortunes.length > 1);
+        lastIndex = index;
+
+        display.classList.remove('fortune-show');
+        void display.offsetWidth; // trigger reflow
+        text.textContent = fortunes[index];
+        display.classList.add('fortune-show');
+      });
+    })();
+  </script>
 
   <script>
     (function() {
@@ -134,46 +180,6 @@
             window.location.href = href;
           });
         }
-      }
-
-      // --- Tot card ---
-      function createPinnedTot(thought, tags, date) {
-        const card = document.createElement('div');
-        card.className = 'pinned-item pinned-tot fade-in';
-
-        const badge = document.createElement('span');
-        badge.className = 'pin-badge';
-        badge.textContent = '📌';
-        card.appendChild(badge);
-
-        const inner = document.createElement('div');
-        inner.className = 'tot-card';
-
-        const meta = document.createElement('div');
-        meta.className = 'tot-meta';
-        meta.textContent = date || '';
-
-        const p = document.createElement('p');
-        p.textContent = thought;
-
-        inner.appendChild(meta);
-        inner.appendChild(p);
-
-        if (tags) {
-          const tagsDiv = document.createElement('div');
-          tagsDiv.className = 'tot-tags';
-          tags.split(',').forEach(function(tag) {
-            const span = document.createElement('span');
-            const trimmed = tag.trim();
-            span.textContent = trimmed.startsWith('#') ? trimmed : '#' + trimmed;
-            tagsDiv.appendChild(span);
-          });
-          inner.appendChild(tagsDiv);
-        }
-
-        card.appendChild(inner);
-        addSourceLink(card, 'tots.html', true);
-        return card;
       }
 
       // --- Gallery item ---
@@ -435,23 +441,11 @@
         const items = [];
 
         try {
-          const [totsRes, galleryRes, musicRes, videosRes] = await Promise.allSettled([
-            fetch(cmsUrl('tots')),
+          const [galleryRes, musicRes, videosRes] = await Promise.allSettled([
             fetch(cmsUrl('gallery')),
             fetch(cmsUrl('music')),
             fetch(cmsUrl('videos'))
           ]);
-
-          // Process Tots
-          if (totsRes.status === 'fulfilled' && totsRes.value.ok) {
-            const data = await totsRes.value.json();
-            var tots = data.tots || [];
-            tots.forEach(function(item) {
-              if (item.thought && Number(item.pinned) === 1) {
-                items.push(createPinnedTot(item.thought, item.tags || '', item.date || ''));
-              }
-            });
-          }
 
           // Process Gallery
           if (galleryRes.status === 'fulfilled' && galleryRes.value.ok) {

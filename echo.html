@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Echo Chamber - Carla</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .echo-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--brown);
+      padding: 6rem 2rem 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .echo-header h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: var(--white);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .echo-header p {
+      color: var(--brown-lighter);
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+    }
+
+    .echo-input-wrap {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 3rem;
+    }
+
+    .echo-input {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid var(--brown-light);
+      border-radius: 30px;
+      padding: 0.85rem 1.5rem;
+      font-size: 1.1rem;
+      color: var(--white);
+      font-family: inherit;
+      outline: none;
+      transition: all var(--transition);
+      width: 220px;
+      text-align: center;
+    }
+
+    .echo-input::placeholder {
+      color: var(--brown-light);
+      opacity: 0.7;
+    }
+
+    .echo-input:focus {
+      border-color: var(--pink);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .echo-submit {
+      background: var(--pink);
+      color: var(--brown);
+      border: none;
+      border-radius: 30px;
+      padding: 0.85rem 1.8rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+
+    .echo-submit:hover {
+      background: var(--pink-light);
+      transform: translateY(-2px);
+    }
+
+    .echo-display {
+      position: relative;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .echo-word {
+      font-size: clamp(3rem, 12vw, 8rem);
+      font-weight: 700;
+      color: var(--white);
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      position: absolute;
+      text-shadow: 0 0 40px rgba(232, 160, 191, 0.3);
+    }
+
+    .echo-word.echo-visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .echo-word.echo-fading {
+      opacity: 0;
+      transform: scale(1.1);
+      transition: opacity 2s ease, transform 2s ease;
+    }
+
+    .echo-hint {
+      color: var(--brown-light);
+      font-size: 0.85rem;
+      margin-top: 1rem;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .echo-hint.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">carla</a>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="music.html">Music</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="videos.html">Videos</a></li>
+        <li><a href="echo.html" class="active">Echo</a></li>
+        <li><a href="sidequests.html">Side Quests</a></li>
+        <li><a href="links.html">Links</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Echo Chamber -->
+  <div class="echo-page">
+    <div class="echo-header">
+      <h1>Echo Chamber</h1>
+      <p>Type a word. Watch it disappear.</p>
+    </div>
+
+    <div class="echo-input-wrap">
+      <input type="text" class="echo-input" id="echo-input" placeholder="one word..." maxlength="20" autocomplete="off">
+      <button class="echo-submit" id="echo-submit">release it</button>
+    </div>
+
+    <div class="echo-display" id="echo-display">
+      <span class="echo-word" id="echo-word"></span>
+    </div>
+
+    <p class="echo-hint" id="echo-hint">it's gone now. like it was never here.</p>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer" style="background: var(--brown); border-top-color: var(--brown-light);">
+    <p style="color: var(--brown-lighter);">made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
+  </footer>
+
+  <script src="cms-config.js"></script>
+  <script src="script.js"></script>
+  <script src="translate.js"></script>
+  <script>
+    (function() {
+      var input = document.getElementById('echo-input');
+      var btn = document.getElementById('echo-submit');
+      var wordEl = document.getElementById('echo-word');
+      var hint = document.getElementById('echo-hint');
+      var timeout = null;
+
+      function echoWord() {
+        var word = input.value.trim().split(/\s+/)[0]; // only first word
+        if (!word) return;
+
+        input.value = '';
+        hint.classList.remove('visible');
+
+        // Reset
+        wordEl.classList.remove('echo-visible', 'echo-fading');
+        void wordEl.offsetWidth;
+
+        wordEl.textContent = word;
+        wordEl.classList.add('echo-visible');
+
+        if (timeout) clearTimeout(timeout);
+
+        timeout = setTimeout(function() {
+          wordEl.classList.add('echo-fading');
+          wordEl.classList.remove('echo-visible');
+
+          setTimeout(function() {
+            wordEl.textContent = '';
+            wordEl.classList.remove('echo-fading');
+            hint.classList.add('visible');
+          }, 2000);
+        }, 3000); // visible for 3s, then 2s fade = 5s total
+      }
+
+      btn.addEventListener('click', echoWord);
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') echoWord();
+      });
+    })();
+  </script>
+</body>
+</html>
