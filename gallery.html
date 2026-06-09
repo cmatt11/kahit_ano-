@@ -48,6 +48,12 @@
     function convertImageUrl(url) {
       if (!url) return '';
 
+      // Handle CMS-relative /cdn/ URLs (R2 uploads)
+      const cmsOrigin = CMS_CONFIG.baseUrl.replace('/api/public', '');
+      if (url.startsWith('/cdn/')) {
+        return cmsOrigin + url;
+      }
+
       // Handle drive.google.com/file/d/FILE_ID/view format
       const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
       if (driveFileMatch) {
@@ -122,23 +128,35 @@
       const embedWrapper = document.createElement('div');
       embedWrapper.className = 'gallery-video-embed';
 
-      const iframe = document.createElement('iframe');
-      iframe.setAttribute('allowfullscreen', '');
-      iframe.setAttribute('frameborder', '0');
-      iframe.setAttribute('loading', 'lazy');
-      iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
-
       const youtubeId = getYouTubeVideoId(url);
+      const driveId = getDriveVideoId(url);
+
       if (youtubeId) {
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('loading', 'lazy');
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
         iframe.src = 'https://www.youtube.com/embed/' + youtubeId;
+        embedWrapper.appendChild(iframe);
+      } else if (driveId) {
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('loading', 'lazy');
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+        iframe.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
+        embedWrapper.appendChild(iframe);
       } else {
-        const driveId = getDriveVideoId(url);
-        if (driveId) {
-          iframe.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
-        }
+        // Direct video file (e.g. /cdn/ uploads from R2)
+        const video = document.createElement('video');
+        video.setAttribute('controls', '');
+        video.setAttribute('preload', 'metadata');
+        const cmsOrigin = CMS_CONFIG.baseUrl.replace('/api/public', '');
+        video.src = url.startsWith('/cdn/') ? cmsOrigin + url : url;
+        embedWrapper.appendChild(video);
       }
 
-      embedWrapper.appendChild(iframe);
       item.appendChild(embedWrapper);
 
       if (caption) {
