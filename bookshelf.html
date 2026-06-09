@@ -480,10 +480,10 @@
           card.appendChild(ribbon);
 
           // Cover
-          if (book.cover_url) {
+          if (book.cover_image_url) {
             var img = document.createElement('img');
             img.className = 'reading-cover';
-            img.src = convertImageUrl(book.cover_url);
+            img.src = convertImageUrl(book.cover_image_url);
             img.alt = book.title || 'Book cover';
             img.loading = 'lazy';
             card.appendChild(img);
@@ -535,8 +535,8 @@
             var spine = document.createElement('div');
             spine.className = 'book-spine';
             spine.style.background = getSpineColor(i + idx);
-            // Vary height slightly for a natural look
-            var height = 130 + Math.floor(Math.random() * 40);
+            // Vary height deterministically based on title length for visual stability
+            var height = (book.title || '').length % 40 + 130;
             spine.style.minHeight = height + 'px';
 
             var titleEl = document.createElement('span');
