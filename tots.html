@@ -43,59 +43,8 @@
     </div>
   </section>
 
+  <script src="cms-config.js"></script>
   <script>
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1-L_RdSX8rsLNTGWaF1Agi-U9Bhd7qmWdHXPYZxXm9lG8H32cl-t5urFSOVuKORHE9EynIgQ6n_i3/pub?output=csv';
-
-    function parseCSV(csvText) {
-      const rows = [];
-      let current = '';
-      let inQuotes = false;
-      let row = [];
-
-      for (let i = 0; i < csvText.length; i++) {
-        const char = csvText[i];
-        const next = csvText[i + 1];
-
-        if (inQuotes) {
-          if (char === '"' && next === '"') {
-            current += '"';
-            i++;
-          } else if (char === '"') {
-            inQuotes = false;
-          } else {
-            current += char;
-          }
-        } else {
-          if (char === '"') {
-            inQuotes = true;
-          } else if (char === ',') {
-            row.push(current.trim());
-            current = '';
-          } else if (char === '\n' || (char === '\r' && next === '\n')) {
-            row.push(current.trim());
-            current = '';
-            if (row.length > 0 && row.some(cell => cell !== '')) {
-              rows.push(row);
-            }
-            row = [];
-            if (char === '\r') i++;
-          } else {
-            current += char;
-          }
-        }
-      }
-
-      // Handle last row
-      if (current || row.length > 0) {
-        row.push(current.trim());
-        if (row.some(cell => cell !== '')) {
-          rows.push(row);
-        }
-      }
-
-      return rows;
-    }
-
     function createTotCard(thought, tags, date) {
       const card = document.createElement('div');
       card.className = 'tot-card fade-in';
@@ -146,16 +95,11 @@
       const loading = document.getElementById('tots-loading');
 
       try {
-        const response = await fetch(SHEET_CSV_URL);
+        const response = await fetch(cmsUrl('tots'));
         if (!response.ok) throw new Error('Failed to fetch');
 
-        const csvText = await response.text();
-        const rows = parseCSV(csvText);
-
-        // Remove header row
-        if (rows.length > 0) {
-          rows.shift();
-        }
+        const data = await response.json();
+        const rows = data.tots || [];
 
         // Remove loading
         loading.remove();
@@ -165,12 +109,11 @@
           return;
         }
 
-        // First row after header = newest, display in order
         const cards = [];
-        rows.forEach(row => {
-          const thought = row[0] || '';
-          const tags = row[1] || '';
-          const date = row[2] || '';
+        rows.forEach(function(item) {
+          const thought = item.thought || '';
+          const tags = item.tags || '';
+          const date = item.date || '';
 
           if (thought) {
             const card = createTotCard(thought, tags, date);

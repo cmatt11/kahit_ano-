@@ -84,7 +84,84 @@
     <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
   </footer>
 
+  <script src="cms-config.js"></script>
   <script src="script.js"></script>
   <script src="translate.js"></script>
+  <script>
+    (function() {
+      function renderSideQuests(quests) {
+        var container = document.querySelector('.preview-row');
+        if (!container || quests.length === 0) return;
+
+        // Map of known page links for side quests by title
+        var pageMap = {
+          'poems': 'poems.html',
+          'films': 'films.html',
+          'films & shows': 'films.html',
+          'astronomy': 'astronomy.html',
+          'games': 'games.html',
+          'psychology': 'psychology.html'
+        };
+
+        // Clear existing static content and replace with dynamic
+        container.innerHTML = '';
+
+        quests.forEach(function(quest) {
+          var href = pageMap[(quest.title || '').toLowerCase()] || '#';
+          var card = document.createElement('a');
+          card.href = href;
+          card.className = 'preview-card fade-in';
+
+          var emoji = document.createElement('div');
+          emoji.className = 'preview-emoji';
+          emoji.textContent = quest.emoji || '🎯';
+          card.appendChild(emoji);
+
+          var h3 = document.createElement('h3');
+          h3.textContent = quest.title || '';
+          card.appendChild(h3);
+
+          var p = document.createElement('p');
+          p.textContent = quest.description || '';
+          card.appendChild(p);
+
+          var link = document.createElement('span');
+          link.className = 'preview-link';
+          link.innerHTML = 'Explore &rarr;';
+          card.appendChild(link);
+
+          container.appendChild(card);
+        });
+
+        // Observe for fade-in
+        var cards = container.querySelectorAll('.fade-in');
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        cards.forEach(function(card) { observer.observe(card); });
+      }
+
+      fetch(cmsUrl('side-quests'))
+        .then(function(r) {
+          if (!r.ok) throw new Error('Failed');
+          return r.json();
+        })
+        .then(function(data) {
+          var quests = data.side_quests || [];
+          if (quests.length > 0) {
+            renderSideQuests(quests);
+          }
+          // If empty, keep existing static content as fallback
+        })
+        .catch(function() {
+          // Keep existing static content as fallback
+        });
+    })();
+  </script>
 </body>
 </html>

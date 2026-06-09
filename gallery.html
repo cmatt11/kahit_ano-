@@ -43,59 +43,8 @@
     </div>
   </section>
 
+  <script src="cms-config.js"></script>
   <script>
-    const GALLERY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQBmQDQVE4_hp-ggUu8KWsSrCvz7x1YQtWO_mIOSbp47WEuDkV__qvS77u1D3_zvuypTDv_MypUS5MM/pub?output=csv';
-
-    function parseCSV(csvText) {
-      const rows = [];
-      let current = '';
-      let inQuotes = false;
-      let row = [];
-
-      for (let i = 0; i < csvText.length; i++) {
-        const char = csvText[i];
-        const next = csvText[i + 1];
-
-        if (inQuotes) {
-          if (char === '"' && next === '"') {
-            current += '"';
-            i++;
-          } else if (char === '"') {
-            inQuotes = false;
-          } else {
-            current += char;
-          }
-        } else {
-          if (char === '"') {
-            inQuotes = true;
-          } else if (char === ',') {
-            row.push(current.trim());
-            current = '';
-          } else if (char === '\n' || (char === '\r' && next === '\n')) {
-            row.push(current.trim());
-            current = '';
-            if (row.length > 0 && row.some(cell => cell !== '')) {
-              rows.push(row);
-            }
-            row = [];
-            if (char === '\r') i++;
-          } else {
-            current += char;
-          }
-        }
-      }
-
-      // Handle last row
-      if (current || row.length > 0) {
-        row.push(current.trim());
-        if (row.some(cell => cell !== '')) {
-          rows.push(row);
-        }
-      }
-
-      return rows;
-    }
-
     function convertImageUrl(url) {
       if (!url) return '';
 
@@ -222,16 +171,11 @@
       const loading = document.getElementById('gallery-loading');
 
       try {
-        const response = await fetch(GALLERY_CSV_URL);
+        const response = await fetch(cmsUrl('gallery'));
         if (!response.ok) throw new Error('Failed to fetch');
 
-        const csvText = await response.text();
-        const rows = parseCSV(csvText);
-
-        // Remove header row
-        if (rows.length > 0) {
-          rows.shift();
-        }
+        const data = await response.json();
+        const rows = data.gallery || [];
 
         // Remove loading
         loading.remove();
@@ -242,18 +186,17 @@
         }
 
         const items = [];
-        rows.forEach(row => {
-          const url = row[0] || '';
-          const caption = row[1] || '';
-          const type = (row[2] || 'photo').toLowerCase().trim();
+        rows.forEach(function(row) {
+          const url = row.url || '';
+          const caption = row.caption || '';
+          const type = (row.type || 'photo').toLowerCase().trim();
 
           if (!url) return;
 
-          let item;
+          var item;
           if (type === 'video') {
             item = createVideoItem(url, caption);
           } else {
-            // Default to photo for backwards compatibility
             item = createPhotoItem(url, caption);
           }
 

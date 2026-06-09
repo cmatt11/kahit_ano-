@@ -82,7 +82,74 @@
     <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
   </footer>
 
+  <script src="cms-config.js"></script>
   <script src="script.js"></script>
   <script src="translate.js"></script>
+  <script>
+    (function() {
+      function renderLinks(links) {
+        var container = document.querySelector('.links-container');
+        if (!container || links.length === 0) return;
+
+        // Clear existing static links and replace with dynamic
+        container.innerHTML = '';
+
+        links.forEach(function(link) {
+          var a = document.createElement('a');
+          a.href = link.url || '#';
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.className = 'link-card fade-in';
+
+          var iconDiv = document.createElement('div');
+          iconDiv.className = 'link-icon';
+          iconDiv.textContent = link.icon || '🔗';
+          a.appendChild(iconDiv);
+
+          var textDiv = document.createElement('div');
+          textDiv.className = 'link-text';
+
+          var h3 = document.createElement('h3');
+          h3.textContent = link.title || '';
+          textDiv.appendChild(h3);
+
+          var p = document.createElement('p');
+          p.textContent = link.description || '';
+          textDiv.appendChild(p);
+
+          a.appendChild(textDiv);
+          container.appendChild(a);
+        });
+
+        // Observe for fade-in
+        var cards = container.querySelectorAll('.fade-in');
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        cards.forEach(function(card) { observer.observe(card); });
+      }
+
+      fetch(cmsUrl('links'))
+        .then(function(r) {
+          if (!r.ok) throw new Error('Failed');
+          return r.json();
+        })
+        .then(function(data) {
+          var links = data.links || [];
+          if (links.length > 0) {
+            renderLinks(links);
+          }
+          // If empty, keep existing static links as fallback
+        })
+        .catch(function() {
+          // Keep existing static links as fallback
+        });
+    })();
+  </script>
 </body>
 </html>

@@ -43,59 +43,8 @@
     </div>
   </section>
 
+  <script src="cms-config.js"></script>
   <script>
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQluR27ryW3DGi7yG3d1UKWDPQejn7elBGyKtGadwmq4gQ5w82PiZ2-ZIyxbRbLgUvMbJBbX7zcBuoR/pub?output=csv';
-
-    function parseCSV(csvText) {
-      const rows = [];
-      let current = '';
-      let inQuotes = false;
-      let row = [];
-
-      for (let i = 0; i < csvText.length; i++) {
-        const char = csvText[i];
-        const next = csvText[i + 1];
-
-        if (inQuotes) {
-          if (char === '"' && next === '"') {
-            current += '"';
-            i++;
-          } else if (char === '"') {
-            inQuotes = false;
-          } else {
-            current += char;
-          }
-        } else {
-          if (char === '"') {
-            inQuotes = true;
-          } else if (char === ',') {
-            row.push(current.trim());
-            current = '';
-          } else if (char === '\n' || (char === '\r' && next === '\n')) {
-            row.push(current.trim());
-            current = '';
-            if (row.length > 0 && row.some(cell => cell !== '')) {
-              rows.push(row);
-            }
-            row = [];
-            if (char === '\r') i++;
-          } else {
-            current += char;
-          }
-        }
-      }
-
-      // Handle last row
-      if (current || row.length > 0) {
-        row.push(current.trim());
-        if (row.some(cell => cell !== '')) {
-          rows.push(row);
-        }
-      }
-
-      return rows;
-    }
-
     function extractYouTubeID(url) {
       if (!url) return null;
 
@@ -175,16 +124,11 @@
       const loading = document.getElementById('videos-loading');
 
       try {
-        const response = await fetch(SHEET_CSV_URL);
+        const response = await fetch(cmsUrl('videos'));
         if (!response.ok) throw new Error('Failed to fetch');
 
-        const csvText = await response.text();
-        const rows = parseCSV(csvText);
-
-        // Remove header row
-        if (rows.length > 0) {
-          rows.shift();
-        }
+        const data = await response.json();
+        const rows = data.videos || [];
 
         // Remove loading
         loading.remove();
@@ -194,12 +138,11 @@
           return;
         }
 
-        // First row after header = newest, display in order
         const cards = [];
-        rows.forEach(row => {
-          const videoUrl = row[0] || '';
-          const title = row[1] || '';
-          const caption = row[2] || '';
+        rows.forEach(function(item) {
+          const videoUrl = item.video_url || '';
+          const title = item.title || '';
+          const caption = item.caption || '';
 
           if (videoUrl) {
             const card = createVideoCard(videoUrl, title, caption);
