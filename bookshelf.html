@@ -691,6 +691,140 @@
       line-height: 1.6;
     }
 
+    /* Community Suggestions */
+    .community-suggestions {
+      margin-top: 3rem;
+    }
+
+    .community-suggestions h2 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+      color: var(--brown);
+    }
+
+    .suggestions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .suggestion-card {
+      background: var(--cream);
+      border: 1px solid var(--brown-lighter);
+      border-radius: 10px;
+      padding: 1.2rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .suggestion-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(92, 61, 46, 0.12);
+    }
+
+    .suggestion-card-title {
+      font-weight: 600;
+      color: var(--brown);
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .suggestion-card-author {
+      font-size: 0.85rem;
+      color: var(--brown-light);
+      margin-bottom: 0.4rem;
+    }
+
+    .suggestion-card-genre {
+      display: inline-block;
+      font-size: 0.7rem;
+      background: rgba(92, 61, 46, 0.08);
+      color: var(--brown);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.4rem;
+    }
+
+    .suggestion-card-note {
+      font-size: 0.8rem;
+      color: var(--brown-light);
+      font-style: italic;
+      margin-top: 0.4rem;
+      line-height: 1.4;
+    }
+
+    body.theme-dark .suggestion-card {
+      background: var(--panel-bg);
+      border-color: var(--panel-border);
+    }
+
+    body.theme-dark .suggestion-card-title {
+      color: var(--text-primary);
+    }
+
+    body.theme-dark .suggestion-card-author,
+    body.theme-dark .suggestion-card-note {
+      color: var(--text-secondary);
+    }
+
+    body.theme-dark .suggestion-card-genre {
+      background: rgba(196, 155, 112, 0.12);
+      color: #e8c9a0;
+    }
+
+    body.theme-minimal .suggestion-card {
+      background: var(--panel-bg);
+      border-color: var(--panel-border);
+    }
+
+    body.theme-minimal .suggestion-card-title {
+      color: var(--text-primary);
+    }
+
+    body.theme-minimal .suggestion-card-author,
+    body.theme-minimal .suggestion-card-note {
+      color: var(--text-secondary);
+    }
+
+    body.theme-minimal .suggestion-card-genre {
+      background: rgba(0, 0, 0, 0.05);
+      color: #495057;
+    }
+
+    .suggest-link-btn {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background: var(--brown);
+      color: var(--white);
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .suggest-link-btn:hover {
+      background: var(--brown-light);
+      transform: translateY(-1px);
+    }
+
+    body.theme-dark .suggest-link-btn {
+      background: #5a3e2a;
+      color: #e8d5c4;
+    }
+
+    body.theme-dark .suggest-link-btn:hover {
+      background: #7a5c3e;
+    }
+
+    body.theme-minimal .suggest-link-btn {
+      background: #495057;
+      color: #fff;
+    }
+
+    body.theme-minimal .suggest-link-btn:hover {
+      background: #6c757d;
+    }
+
     /* Loading State */
     .bookshelf-loading {
       text-align: center;
@@ -795,6 +929,16 @@
   <section class="section reading-log" id="reading-log" style="display:none;">
     <h2>Reading Log &#128221;</h2>
     <div class="log-list" id="log-list"></div>
+  </section>
+
+  <!-- Community Suggestions -->
+  <section class="section community-suggestions" id="community-suggestions" style="display:none;">
+    <h2>Suggested by the Community &#128161;</h2>
+    <p style="color:var(--brown-light);font-size:0.9rem;margin-bottom:1.2rem;">Books na nirerecommend ng mga tao. Salamat sa suggestions!</p>
+    <div class="suggestions-grid" id="suggestions-grid"></div>
+    <div style="text-align:center;margin-top:1.5rem;">
+      <a href="suggest.html" class="suggest-link-btn">&#128218; Suggest a Book</a>
+    </div>
   </section>
 
   <script src="cms-config.js"></script>
@@ -1110,7 +1254,13 @@
 
         if (book.file_url) {
           var fileLink = convertFileUrl(book.file_url);
-          html += '<a href="' + escapeHtml(fileLink) + '" target="_blank" rel="noopener noreferrer" class="book-file-link">get the book here &rarr;</a>';
+          var isPdf = fileLink.toLowerCase().indexOf('.pdf') !== -1 || fileLink.toLowerCase().indexOf('application/pdf') !== -1;
+          if (isPdf) {
+            var readerLink = 'reader.html?url=' + encodeURIComponent(fileLink) + '&title=' + encodeURIComponent(book.title || 'Untitled') + '&id=' + encodeURIComponent(book.id);
+            html += '<a href="' + escapeHtml(readerLink) + '" class="book-file-link">read it here &rarr;</a>';
+          } else {
+            html += '<a href="' + escapeHtml(fileLink) + '" target="_blank" rel="noopener noreferrer" class="book-file-link">get the book here &rarr;</a>';
+          }
         }
 
         // Bookmark toggle
@@ -1256,7 +1406,44 @@
         }
       }
 
+      // ====== COMMUNITY SUGGESTIONS ======
+      async function loadSuggestions() {
+        try {
+          var response = await fetch(cmsUrl('book-suggestions'));
+          if (!response.ok) return;
+
+          var data = await response.json();
+          var suggestions = data.suggestions || [];
+
+          if (suggestions.length === 0) return;
+
+          var section = document.getElementById('community-suggestions');
+          var grid = document.getElementById('suggestions-grid');
+          section.style.display = '';
+
+          suggestions.forEach(function(sug) {
+            var card = document.createElement('div');
+            card.className = 'suggestion-card fade-in';
+
+            var html = '<div class="suggestion-card-title">' + escapeHtml(sug.title) + '</div>';
+            html += '<div class="suggestion-card-author">by ' + escapeHtml(sug.author) + '</div>';
+            html += '<span class="suggestion-card-genre">' + escapeHtml(sug.genre) + '</span>';
+            if (sug.note) {
+              html += '<div class="suggestion-card-note">"' + escapeHtml(sug.note) + '"</div>';
+            }
+
+            card.innerHTML = html;
+            grid.appendChild(card);
+          });
+
+          observeFadeIn(grid.querySelectorAll('.fade-in'));
+        } catch(e) {
+          // silently fail - suggestions are non-critical
+        }
+      }
+
       loadBooks();
+      loadSuggestions();
     })();
   </script>
 
