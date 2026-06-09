@@ -110,6 +110,115 @@
     .echo-hint.visible {
       opacity: 1;
     }
+
+    /* ===== Keyword effects ===== */
+
+    /* love: hearts floating up */
+    .echo-fx-heart {
+      position: fixed;
+      bottom: -3rem;
+      font-size: 2rem;
+      pointer-events: none;
+      z-index: 1000;
+      will-change: transform, opacity;
+      animation: echo-float-up 3s ease-in forwards;
+    }
+    @keyframes echo-float-up {
+      0% { transform: translateY(0) scale(0.8); opacity: 0; }
+      12% { opacity: 1; }
+      100% { transform: translateY(-105vh) scale(1.25); opacity: 0; }
+    }
+
+    /* birthday: cake drop + confetti */
+    .echo-fx-cake {
+      position: fixed;
+      top: -5rem;
+      left: 50%;
+      margin-left: -2.5rem;
+      font-size: 5rem;
+      pointer-events: none;
+      z-index: 1001;
+      animation: echo-cake-drop 3s cubic-bezier(0.5, 0, 0.5, 1) forwards;
+    }
+    @keyframes echo-cake-drop {
+      0% { transform: translateY(0); opacity: 0; }
+      12% { opacity: 1; }
+      55% { transform: translateY(38vh); }
+      70% { transform: translateY(33vh); }
+      85% { transform: translateY(36vh); opacity: 1; }
+      100% { transform: translateY(36vh); opacity: 0; }
+    }
+
+    .echo-fx-confetti {
+      position: fixed;
+      top: -1rem;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      z-index: 1000;
+      will-change: transform, opacity;
+      animation: echo-confetti-fall linear forwards;
+    }
+    @keyframes echo-confetti-fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(105vh) rotate(720deg); opacity: 0.2; }
+    }
+
+    /* missu: centered popup */
+    .echo-fx-missu {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      font-style: italic;
+      font-weight: 600;
+      color: var(--pink);
+      font-size: clamp(1.5rem, 5vw, 3rem);
+      text-shadow: 0 0 24px rgba(232, 160, 191, 0.5);
+      z-index: 1002;
+      pointer-events: none;
+      white-space: nowrap;
+      animation: echo-missu-pop 3s ease forwards;
+    }
+    @keyframes echo-missu-pop {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.06); }
+    }
+
+    /* hi / hello: rickroll overlay */
+    .echo-fx-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      animation: echo-overlay-in 0.4s ease forwards;
+    }
+    @keyframes echo-overlay-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .echo-fx-overlay iframe {
+      width: min(90vw, 820px);
+      aspect-ratio: 16 / 9;
+      border: 0;
+      border-radius: 12px;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+    }
+    .echo-fx-overlay-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -190,6 +299,78 @@
         }, 3000);
       }
 
+      // love: 15 hearts float up from the bottom across random x positions
+      function triggerHearts() {
+        for (var i = 0; i < 15; i++) {
+          var heart = document.createElement('span');
+          heart.className = 'echo-fx-heart';
+          heart.textContent = '\u2764\uFE0F';
+          heart.style.left = (Math.random() * 96) + 'vw';
+          heart.style.fontSize = (1.4 + Math.random() * 1.6) + 'rem';
+          heart.style.animationDelay = (Math.random() * 0.6) + 's';
+          document.body.appendChild(heart);
+          (function(el) {
+            setTimeout(function() { el.remove(); }, 3800);
+          })(heart);
+        }
+      }
+
+      // birthday: cake drops from top center + confetti rains down
+      function triggerBirthday() {
+        var cake = document.createElement('div');
+        cake.className = 'echo-fx-cake';
+        cake.textContent = '\uD83C\uDF82';
+        document.body.appendChild(cake);
+        setTimeout(function() { cake.remove(); }, 3200);
+
+        var colors = ['#e74c3c', '#f39c12', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6', '#e8a0bf'];
+        for (var i = 0; i < 45; i++) {
+          var piece = document.createElement('div');
+          piece.className = 'echo-fx-confetti';
+          piece.style.left = (Math.random() * 100) + 'vw';
+          piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+          piece.style.animationDuration = (2 + Math.random() * 1.3) + 's';
+          piece.style.animationDelay = (Math.random() * 0.7) + 's';
+          if (Math.random() > 0.5) piece.style.borderRadius = '2px';
+          document.body.appendChild(piece);
+          (function(el) {
+            setTimeout(function() { el.remove(); }, 4200);
+          })(piece);
+        }
+      }
+
+      // missu: centered italic pink popup that fades after 3s
+      function triggerMissU() {
+        var popup = document.createElement('div');
+        popup.className = 'echo-fx-missu';
+        popup.textContent = 'miss ka ba?';
+        document.body.appendChild(popup);
+        setTimeout(function() { popup.remove(); }, 3200);
+      }
+
+      // hi / hello: dark overlay with an autoplaying rickroll, click to close
+      function triggerRickroll() {
+        var overlay = document.createElement('div');
+        overlay.className = 'echo-fx-overlay';
+
+        var iframe = document.createElement('iframe');
+        iframe.src = 'https://www.youtube.com/embed/Aq5WXmQQooo?autoplay=1';
+        iframe.allow = 'autoplay; encrypted-media';
+        iframe.setAttribute('allowfullscreen', '');
+        overlay.appendChild(iframe);
+
+        var closeHint = document.createElement('div');
+        closeHint.className = 'echo-fx-overlay-hint';
+        closeHint.textContent = 'click anywhere to close';
+        overlay.appendChild(closeHint);
+
+        overlay.addEventListener('click', function() {
+          overlay.remove();
+        });
+
+        document.body.appendChild(overlay);
+      }
+
       function echoWord() {
         var word = input.value.trim().split(/\s+/)[0]; // only first word
         if (!word) return;
@@ -201,6 +382,20 @@
         // Check for rainbow keyword
         if (lowerWord === 'rainbow') {
           showRainbowPopup();
+        }
+
+        // Extra keyword effects (in addition to the normal echo)
+        if (lowerWord === 'love') {
+          triggerHearts();
+        }
+        if (lowerWord === 'birthday') {
+          triggerBirthday();
+        }
+        if (lowerWord === 'missu') {
+          triggerMissU();
+        }
+        if (lowerWord === 'hi' || lowerWord === 'hello') {
+          triggerRickroll();
         }
 
         // Check for color keyword
