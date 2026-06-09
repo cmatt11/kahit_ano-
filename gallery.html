@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Photos - Carla</title>
+  <title>Gallery - Carla</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -20,7 +20,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="tots.html">Mga Tots</a></li>
         <li><a href="music.html">Music</a></li>
-        <li><a href="photos.html">Photos</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
         <li><a href="videos.html">Videos</a></li>
         <li><a href="sidequests.html">Side Quests</a></li>
         <li><a href="links.html">Links</a></li>
@@ -30,21 +30,21 @@
 
   <!-- Page Header -->
   <header class="page-header">
-    <h1>Photos 📸</h1>
-    <p data-en="my personal pinterest board but here.">my personal pinterest board pero dito.</p>
+    <h1 data-en="Gallery">Gallery 📸🎬</h1>
+    <p data-en="my personal pinterest board and mini cinema, pero dito.">my personal pinterest board at mini cinema, pero dito.</p>
   </header>
 
   <!-- Gallery Content -->
   <section class="section">
     <div class="gallery-grid" id="gallery-grid">
       <div class="gallery-loading" id="gallery-loading">
-        <p>loading photos... antay lang ha</p>
+        <p>loading gallery... sandali lang, naglo-load pa 'to hehe</p>
       </div>
     </div>
   </section>
 
   <script>
-    const PHOTOS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQBmQDQVE4_hp-ggUu8KWsSrCvz7x1YQtWO_mIOSbp47WEuDkV__qvS77u1D3_zvuypTDv_MypUS5MM/pub?output=csv';
+    const GALLERY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQBmQDQVE4_hp-ggUu8KWsSrCvz7x1YQtWO_mIOSbp47WEuDkV__qvS77u1D3_zvuypTDv_MypUS5MM/pub?output=csv';
 
     function parseCSV(csvText) {
       const rows = [];
@@ -115,7 +115,38 @@
       return url;
     }
 
-    function createGalleryItem(imageUrl, caption) {
+    function getYouTubeVideoId(url) {
+      if (!url) return null;
+      // Match youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
+      const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+        /youtube\.com\/.*[?&]v=([a-zA-Z0-9_-]{11})/
+      ];
+      for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+      }
+      return null;
+    }
+
+    function getDriveVideoId(url) {
+      if (!url) return null;
+      const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+      if (driveFileMatch) return driveFileMatch[1];
+      const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([^&\?]+)/);
+      if (driveOpenMatch) return driveOpenMatch[1];
+      return null;
+    }
+
+    function isYouTubeUrl(url) {
+      return /youtube\.com|youtu\.be/.test(url);
+    }
+
+    function isDriveUrl(url) {
+      return /drive\.google\.com/.test(url);
+    }
+
+    function createPhotoItem(imageUrl, caption) {
       const item = document.createElement('div');
       item.className = 'gallery-item fade-in';
 
@@ -130,6 +161,42 @@
         overlay.className = 'gallery-caption';
         overlay.textContent = caption;
         item.appendChild(overlay);
+      }
+
+      return item;
+    }
+
+    function createVideoItem(url, caption) {
+      const item = document.createElement('div');
+      item.className = 'gallery-item gallery-video-item fade-in';
+
+      const embedWrapper = document.createElement('div');
+      embedWrapper.className = 'gallery-video-embed';
+
+      const iframe = document.createElement('iframe');
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('frameborder', '0');
+      iframe.setAttribute('loading', 'lazy');
+      iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+
+      const youtubeId = getYouTubeVideoId(url);
+      if (youtubeId) {
+        iframe.src = 'https://www.youtube.com/embed/' + youtubeId;
+      } else {
+        const driveId = getDriveVideoId(url);
+        if (driveId) {
+          iframe.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
+        }
+      }
+
+      embedWrapper.appendChild(iframe);
+      item.appendChild(embedWrapper);
+
+      if (caption) {
+        const captionEl = document.createElement('div');
+        captionEl.className = 'gallery-video-caption';
+        captionEl.textContent = caption;
+        item.appendChild(captionEl);
       }
 
       return item;
@@ -150,12 +217,12 @@
       elements.forEach(el => observer.observe(el));
     }
 
-    async function loadPhotos() {
+    async function loadGallery() {
       const grid = document.getElementById('gallery-grid');
       const loading = document.getElementById('gallery-loading');
 
       try {
-        const response = await fetch(PHOTOS_CSV_URL);
+        const response = await fetch(GALLERY_CSV_URL);
         if (!response.ok) throw new Error('Failed to fetch');
 
         const csvText = await response.text();
@@ -170,21 +237,28 @@
         loading.remove();
 
         if (rows.length === 0) {
-          grid.innerHTML = '<div class="gallery-empty"><p>wala pang photos dito... mag-uupload ako soon!</p></div>';
+          grid.innerHTML = '<div class="gallery-empty"><p>wala pang laman dito... mag-uupload ako soon, promise! cheka lang</p></div>';
           return;
         }
 
-        // First row after header = newest, display in order
         const items = [];
         rows.forEach(row => {
-          const imageUrl = row[0] || '';
+          const url = row[0] || '';
           const caption = row[1] || '';
+          const type = (row[2] || 'photo').toLowerCase().trim();
 
-          if (imageUrl) {
-            const item = createGalleryItem(imageUrl, caption);
-            grid.appendChild(item);
-            items.push(item);
+          if (!url) return;
+
+          let item;
+          if (type === 'video') {
+            item = createVideoItem(url, caption);
+          } else {
+            // Default to photo for backwards compatibility
+            item = createPhotoItem(url, caption);
           }
+
+          grid.appendChild(item);
+          items.push(item);
         });
 
         // Observe all new items for fade-in animation
@@ -192,11 +266,11 @@
 
       } catch (error) {
         loading.remove();
-        grid.innerHTML = '<div class="gallery-empty"><p>ay sorry, di ko ma-load yung photos right now. try mo ulit mamaya!</p></div>';
+        grid.innerHTML = '<div class="gallery-empty"><p>ay nako, nag-iinarte yung internet mo lol. di ko ma-load yung gallery. try mo ulit mamaya ha!</p></div>';
       }
     }
 
-    loadPhotos();
+    loadGallery();
   </script>
 
   <!-- Footer -->

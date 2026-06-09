@@ -480,6 +480,37 @@ img {
   font-weight: 500;
 }
 
+.gallery-video-item {
+  aspect-ratio: auto !important;
+}
+
+.gallery-video-embed {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  width: 100%;
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+}
+
+.gallery-video-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.gallery-video-caption {
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--brown);
+  background: var(--white);
+  border-top: 1px solid var(--brown-lighter);
+}
+
 .gallery-loading,
 .gallery-empty {
   grid-column: 1 / -1;
