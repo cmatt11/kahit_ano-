@@ -47,7 +47,7 @@
       <span class="pinned-chevron" id="pinned-chevron">&#9662;</span>
     </button>
     <div class="pinned-collapse" id="pinned-collapse">
-      <p class="pinned-subtitle" data-en="Stuff I want you to see first. You're welcome.">Mga bagay na gusto kong makita mo agad. De wala lang haha</p>
+      <p class="pinned-subtitle" data-en="A few things worth checking out first.">A few things worth checking out first.</p>
       <div class="pinned-grid" id="pinned-grid"></div>
     </div>
   </section>
@@ -171,20 +171,22 @@
         return value && value.trim().toLowerCase() === 'p';
       }
 
-      // Adds a "open in [section]" link to a pinned card.
-      // For cards without interactive embeds, also makes the whole card clickable.
-      function addSourceLink(card, href, label, fullClickable) {
-        const link = document.createElement('a');
-        link.className = 'pinned-source-link';
-        link.href = href;
-        link.innerHTML = label + ' &rarr;';
-        card.appendChild(link);
+      // Adds a small "See here" button to a pinned card linking to its source page.
+      // For cards without interactive embeds, the whole card is also clickable.
+      function addSourceLink(card, href, fullClickable) {
+        const btn = document.createElement('a');
+        btn.className = 'pinned-btn';
+        btn.href = href;
+        btn.innerHTML = 'See here &rarr;';
+        btn.addEventListener('click', function(e) {
+          // Let the button handle its own navigation without triggering the card handler
+          e.stopPropagation();
+        });
+        card.appendChild(btn);
 
         if (fullClickable) {
           card.classList.add('pinned-clickable');
-          card.addEventListener('click', function(e) {
-            // Don't double-navigate if the link itself was clicked
-            if (e.target.closest('.pinned-source-link')) return;
+          card.addEventListener('click', function() {
             window.location.href = href;
           });
         }
@@ -226,7 +228,7 @@
         }
 
         card.appendChild(inner);
-        addSourceLink(card, 'tots.html', 'open in tots', true);
+        addSourceLink(card, 'tots.html', true);
         return card;
       }
 
@@ -285,7 +287,7 @@
         }
 
         card.appendChild(inner);
-        addSourceLink(card, 'gallery.html', 'open in gallery', true);
+        addSourceLink(card, 'gallery.html', true);
         return card;
       }
 
@@ -332,7 +334,7 @@
         }
 
         card.appendChild(inner);
-        addSourceLink(card, 'gallery.html', 'open in gallery', false);
+        addSourceLink(card, 'gallery.html', false);
         return card;
       }
 
@@ -408,7 +410,7 @@
         inner.appendChild(iframe);
 
         card.appendChild(inner);
-        addSourceLink(card, 'music.html', 'open in music', false);
+        addSourceLink(card, 'music.html', false);
         return card;
       }
 

@@ -880,18 +880,23 @@ img {
   margin-top: 1.5rem;
 }
 
-/* Source link on each pinned card */
-.pinned-source-link {
+/* "See here" button on each pinned card */
+.pinned-btn {
   display: inline-block;
-  margin-top: 0.75rem;
-  font-size: 0.85rem;
+  margin-top: 0.85rem;
+  padding: 0.4rem 1rem;
+  background: var(--brown);
+  color: var(--white);
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--pink-dark);
-  transition: color var(--transition);
+  border-radius: 20px;
+  transition: all var(--transition);
 }
 
-.pinned-source-link:hover {
-  color: var(--brown);
+.pinned-btn:hover {
+  background: var(--pink-dark);
+  color: var(--white);
+  transform: translateY(-1px);
 }
 
 .pinned-clickable {
