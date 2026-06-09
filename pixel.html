@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Art Corner - Carla</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .pixel-page {
+      min-height: 100vh;
+      background: var(--brown);
+      padding: 6rem 2rem 4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .pixel-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .pixel-header h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: var(--white);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .pixel-header p {
+      color: var(--brown-lighter);
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .pixel-counter {
+      color: var(--pink-light);
+      font-size: 0.95rem;
+      margin-top: 0.75rem;
+      opacity: 0.85;
+    }
+
+    .pixel-canvas-wrap {
+      position: relative;
+      margin: 1.5rem auto;
+      max-width: 100%;
+    }
+
+    .pixel-grid {
+      display: grid;
+      grid-template-columns: repeat(32, 1fr);
+      gap: 0px;
+      border: 2px solid var(--brown-light);
+      border-radius: 8px;
+      overflow: hidden;
+      width: min(80vw, 512px);
+      height: min(80vw, 512px);
+      background: #3d2517;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .pixel-cell {
+      aspect-ratio: 1;
+      background: transparent;
+      border: 0.5px solid rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .pixel-cell:hover {
+      outline: 2px solid var(--pink);
+      outline-offset: -2px;
+      z-index: 1;
+    }
+
+    .pixel-cell.placed {
+      cursor: default;
+    }
+
+    .pixel-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 1.5rem auto;
+      max-width: 400px;
+    }
+
+    .palette-color {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .palette-color:hover {
+      transform: scale(1.2);
+    }
+
+    .palette-color.selected {
+      border-color: var(--white);
+      transform: scale(1.25);
+      box-shadow: 0 0 12px rgba(255,255,255,0.3);
+    }
+
+    .pixel-status {
+      color: var(--brown-lighter);
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 1rem;
+      min-height: 1.5rem;
+      transition: opacity 0.3s ease;
+    }
+
+    .pixel-status.success {
+      color: var(--pink-light);
+    }
+
+    .pixel-status.error {
+      color: #e88e8e;
+    }
+
+    .pixel-loading {
+      color: var(--brown-lighter);
+      font-size: 1.1rem;
+      text-align: center;
+      padding: 3rem;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 600px) {
+      .pixel-grid {
+        width: 92vw;
+        height: 92vw;
+      }
+
+      .palette-color {
+        width: 28px;
+        height: 28px;
+      }
+
+      .pixel-page {
+        padding: 5rem 1rem 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">carla</a>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="music.html">Music</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="bookshelf.html">Bookshelf</a></li>
+        <li><a href="videos.html">Videos</a></li>
+        <li><a href="echo.html">Echo</a></li>
+        <li><a href="pixel.html" class="active">Pixel Art</a></li>
+        <li><a href="sidequests.html">Side Quests</a></li>
+        <li><a href="links.html">Links</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="pixel-page">
+    <div class="pixel-header">
+      <h1>Pixel Art Corner</h1>
+      <p>One pixel per visit. Isa lang ha, wag greedy! Let's make something together, one tiny square at a time.</p>
+      <div class="pixel-counter" id="pixel-counter">Loading the canvas...</div>
+    </div>
+
+    <div class="pixel-palette" id="pixel-palette"></div>
+
+    <div class="pixel-canvas-wrap">
+      <div class="pixel-grid" id="pixel-grid">
+        <div class="pixel-loading" id="pixel-loading">Sandali lang, loading ang masterpiece... 🎨</div>
+      </div>
+    </div>
+
+    <p class="pixel-status" id="pixel-status"></p>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer" style="background: var(--brown); border-top-color: var(--brown-light);">
+    <p style="color: var(--brown-lighter);">made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
+  </footer>
+
+  <script src="cms-config.js"></script>
+  <script src="script.js"></script>
+  <script src="translate.js"></script>
+  <script>
+    (function() {
+      var GRID_SIZE = 32;
+      var STORAGE_KEY = 'pixel_art_placed';
+      var PIXEL_DATA_KEY = 'pixel_art_data';
+      var API_BASE = 'https://kahitanocs.ochina1123.workers.dev/api/public';
+      var USER_ID = '771beace-54cc-46ed-9204-770915f16348';
+
+      var PALETTE = [
+        '#5c3d2e', '#8b5e3c', '#b68973', '#e8d5c4',
+        '#fdf8f4', '#fefefe', '#1a1a1a', '#4a4a4a',
+        '#e8a0bf', '#f5d5e0', '#c77dba', '#d4a5a5',
+        '#7db87d', '#6b9bd1', '#f2c94c', '#e07a5f'
+      ];
+
+      var selectedColor = PALETTE[8]; // start with pink
+      var hasPlaced = localStorage.getItem(STORAGE_KEY) === 'true';
+      var pixelData = {}; // {x_y: color}
+      var grid = document.getElementById('pixel-grid');
+      var status = document.getElementById('pixel-status');
+      var counter = document.getElementById('pixel-counter');
+      var paletteEl = document.getElementById('pixel-palette');
+
+      // Build palette
+      PALETTE.forEach(function(color) {
+        var swatch = document.createElement('div');
+        swatch.className = 'palette-color' + (color === selectedColor ? ' selected' : '');
+        swatch.style.backgroundColor = color;
+        swatch.title = color;
+        swatch.addEventListener('click', function() {
+          document.querySelectorAll('.palette-color').forEach(function(el) {
+            el.classList.remove('selected');
+          });
+          swatch.classList.add('selected');
+          selectedColor = color;
+        });
+        paletteEl.appendChild(swatch);
+      });
+
+      // Build the grid
+      function renderGrid() {
+        grid.innerHTML = '';
+        for (var y = 0; y < GRID_SIZE; y++) {
+          for (var x = 0; x < GRID_SIZE; x++) {
+            var cell = document.createElement('div');
+            cell.className = 'pixel-cell';
+            cell.dataset.x = x;
+            cell.dataset.y = y;
+            var key = x + '_' + y;
+            if (pixelData[key]) {
+              cell.style.backgroundColor = pixelData[key];
+              cell.classList.add('placed');
+            }
+            cell.addEventListener('click', handleCellClick);
+            grid.appendChild(cell);
+          }
+        }
+        updateCounter();
+      }
+
+      function updateCounter() {
+        var count = Object.keys(pixelData).length;
+        counter.textContent = count + ' pixel' + (count !== 1 ? 's' : '') + ' placed so far';
+      }
+
+      function showStatus(msg, type) {
+        status.textContent = msg;
+        status.className = 'pixel-status' + (type ? ' ' + type : '');
+      }
+
+      function handleCellClick(e) {
+        if (hasPlaced) {
+          showStatus("Isa lang per visit, mare! Come back tomorrow para mag-pixel ulit. 😂", 'error');
+          return;
+        }
+
+        var x = parseInt(e.target.dataset.x);
+        var y = parseInt(e.target.dataset.y);
+        var key = x + '_' + y;
+
+        if (pixelData[key]) {
+          showStatus("May pixel na diyan! Pick an empty spot.", 'error');
+          return;
+        }
+
+        // Place the pixel
+        pixelData[key] = selectedColor;
+        e.target.style.backgroundColor = selectedColor;
+        e.target.classList.add('placed');
+        hasPlaced = true;
+        localStorage.setItem(STORAGE_KEY, 'true');
+
+        // Save locally
+        saveToLocal();
+        updateCounter();
+        showStatus("Nice one! Your pixel is now part of the masterpiece. ✨", 'success');
+
+        // Try API
+        postToAPI(x, y, selectedColor);
+      }
+
+      function saveToLocal() {
+        try {
+          localStorage.setItem(PIXEL_DATA_KEY, JSON.stringify(pixelData));
+        } catch(e) {}
+      }
+
+      function loadFromLocal() {
+        try {
+          var data = localStorage.getItem(PIXEL_DATA_KEY);
+          if (data) {
+            pixelData = JSON.parse(data);
+          }
+        } catch(e) {
+          pixelData = {};
+        }
+      }
+
+      function postToAPI(x, y, color) {
+        fetch(API_BASE + '/place-pixel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ x: x, y: y, color: color })
+        }).catch(function() {
+          // API not available, that's fine - we already saved locally
+        });
+      }
+
+      function loadFromAPI() {
+        fetch(API_BASE + '/' + USER_ID + '/pixels')
+          .then(function(r) {
+            if (!r.ok) throw new Error('not ok');
+            return r.json();
+          })
+          .then(function(data) {
+            var pixels = data.pixels || data || [];
+            if (Array.isArray(pixels)) {
+              pixels.forEach(function(p) {
+                if (p.x !== undefined && p.y !== undefined && p.color) {
+                  pixelData[p.x + '_' + p.y] = p.color;
+                }
+              });
+            }
+            saveToLocal();
+            renderGrid();
+          })
+          .catch(function() {
+            // API unavailable - just use localStorage
+            loadFromLocal();
+            renderGrid();
+          });
+      }
+
+      // Initialize
+      loadFromLocal();
+      loadFromAPI();
+
+    })();
+  </script>
+</body>
+</html>
