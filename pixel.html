@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Art Corner - Carla</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .pixel-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 1rem 3rem;
+    }
+
+    .pixel-intro {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .pixel-stats {
+      font-size: 0.85rem;
+      color: var(--brown-light);
+      margin-top: 0.4rem;
+    }
+
+    .pixel-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    /* The canvas grid */
+    .pixel-canvas {
+      display: grid;
+      width: min(92vw, 512px);
+      aspect-ratio: 1 / 1;
+      background: var(--brown-lighter);
+      gap: 1px;
+      border: 3px solid var(--brown);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(92, 61, 46, 0.18);
+      touch-action: manipulation;
+      overflow: hidden;
+    }
+
+    .pixel-cell {
+      background: var(--white);
+      cursor: pointer;
+      transition: transform 0.05s ease;
+    }
+
+    .pixel-canvas.locked .pixel-cell {
+      cursor: not-allowed;
+    }
+
+    .pixel-canvas:not(.locked) .pixel-cell:hover {
+      outline: 2px solid var(--brown);
+      outline-offset: -2px;
+      z-index: 2;
+    }
+
+    /* Color palette */
+    .pixel-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      max-width: 420px;
+    }
+
+    .palette-swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      border: 2px solid var(--brown-lighter);
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .palette-swatch:hover {
+      transform: scale(1.12);
+    }
+
+    .palette-swatch.active {
+      border-color: var(--brown);
+      box-shadow: 0 0 0 2px rgba(92, 61, 46, 0.25);
+      transform: scale(1.12);
+    }
+
+    .pixel-status {
+      min-height: 1.4rem;
+      font-size: 0.95rem;
+      color: var(--brown);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .pixel-note {
+      font-size: 0.8rem;
+      color: var(--brown-light);
+      text-align: center;
+      max-width: 460px;
+      line-height: 1.5;
+    }
+
+    .pixel-loading {
+      text-align: center;
+      color: var(--brown-light);
+      padding: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">carla</a>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="music.html">Music</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="bookshelf.html">Bookshelf</a></li>
+        <li><a href="videos.html">Videos</a></li>
+        <li><a href="echo.html">Echo</a></li>
+        <li><a href="sidequests.html">Side Quests</a></li>
+        <li><a href="pixel.html" class="active">Pixel</a></li>
+        <li><a href="links.html">Links</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1>Pixel Art Corner &#127912;</h1>
+    <p data-en="One pixel per visit. We build the art together, little by little.">Isang pixel kada bisita. Tulong-tulong tayong gumawa ng art, paunti-unti.</p>
+  </header>
+
+  <div class="pixel-wrap">
+    <div class="pixel-intro">
+      <p class="pixel-stats" id="pixel-stats">loading the canvas...</p>
+    </div>
+
+    <div class="pixel-stage">
+      <div class="pixel-loading" id="pixel-loading">
+        <p data-en="Loading the canvas...">Sandali, binubuksan ang canvas...</p>
+      </div>
+
+      <div class="pixel-canvas" id="pixel-canvas" style="display:none;"></div>
+
+      <div class="pixel-palette" id="pixel-palette"></div>
+
+      <p class="pixel-status" id="pixel-status"></p>
+
+      <p class="pixel-note" data-en="Pick a color, then tap an empty square to place your pixel. You get one pixel each day, so make it count. Come back tomorrow to add another.">Pumili ng kulay, tapos i-tap ang isang parisukat para ilagay ang pixel mo. Isang pixel ka kada araw, kaya ingatan mo. Balik ka bukas para sa isa pa.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>made with <a href="secret.html" class="footer-heart-link"><span class="footer-heart">&hearts;</span></a> by carla &middot; 2024</p>
+  </footer>
+
+  <script src="cms-config.js"></script>
+  <script src="script.js"></script>
+  <script src="translate.js"></script>
+
+  <script>
+    (function() {
+      var GRID_SIZE = 32;
+      var FALLBACK_PALETTE = [
+        '#fdf8f4', '#e8d5c4', '#b68973', '#5c3d2e', '#3c2415',
+        '#e8a0bf', '#d96c9a', '#f4c542', '#e8833a', '#c0392b',
+        '#7fb069', '#3a7d44', '#6fa8dc', '#3d6fb4', '#2c2c2c',
+        '#9b59b6'
+      ];
+      var PLACE_URL = CMS_CONFIG.baseUrl + '/place-pixel';
+      var STORAGE_KEY = 'pixel_last_placed_date';
+
+      var canvasEl = document.getElementById('pixel-canvas');
+      var paletteEl = document.getElementById('pixel-palette');
+      var statusEl = document.getElementById('pixel-status');
+      var statsEl = document.getElementById('pixel-stats');
+      var loadingEl = document.getElementById('pixel-loading');
+
+      var palette = FALLBACK_PALETTE;
+      var size = GRID_SIZE;
+      var selectedColor = null;
+      var cells = {};
+      var placedCount = 0;
+
+      function todayStr() {
+        // Match the server: rotate on Manila (UTC+8) calendar day.
+        return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+      }
+
+      function hasPlacedToday() {
+        return localStorage.getItem(STORAGE_KEY) === todayStr();
+      }
+
+      function markPlacedToday() {
+        try { localStorage.setItem(STORAGE_KEY, todayStr()); } catch (e) {}
+      }
+
+      function setStatus(msg) {
+        statusEl.textContent = msg || '';
+      }
+
+      function updateStats() {
+        statsEl.textContent = placedCount + ' / ' + (size * size) + ' pixels placed by visitors';
+      }
+
+      function buildPalette() {
+        paletteEl.innerHTML = '';
+        palette.forEach(function(color, i) {
+          var sw = document.createElement('div');
+          sw.className = 'palette-swatch';
+          sw.style.background = color;
+          sw.title = color;
+          sw.setAttribute('role', 'button');
+          sw.setAttribute('aria-label', 'Choose color ' + color);
+          sw.addEventListener('click', function() {
+            selectedColor = color;
+            document.querySelectorAll('.palette-swatch').forEach(function(s) { s.classList.remove('active'); });
+            sw.classList.add('active');
+          });
+          paletteEl.appendChild(sw);
+          if (i === 0) { sw.classList.add('active'); selectedColor = color; }
+        });
+      }
+
+      function buildCanvas() {
+        canvasEl.style.gridTemplateColumns = 'repeat(' + size + ', 1fr)';
+        canvasEl.innerHTML = '';
+        cells = {};
+        for (var y = 0; y < size; y++) {
+          for (var x = 0; x < size; x++) {
+            var cell = document.createElement('div');
+            cell.className = 'pixel-cell';
+            cell.dataset.x = x;
+            cell.dataset.y = y;
+            cell.addEventListener('click', onCellClick);
+            cells[x + '_' + y] = cell;
+            canvasEl.appendChild(cell);
+          }
+        }
+        canvasEl.style.display = 'grid';
+        loadingEl.style.display = 'none';
+      }
+
+      function paintCell(x, y, color) {
+        var cell = cells[x + '_' + y];
+        if (cell) cell.style.background = color;
+      }
+
+      function applyLockState() {
+        if (hasPlacedToday()) {
+          canvasEl.classList.add('locked');
+          setStatus(getText(
+            'Naglagay ka na ng pixel ngayong araw. Balik ka bukas!',
+            'You already placed a pixel today. Come back tomorrow!'
+          ));
+        } else {
+          canvasEl.classList.remove('locked');
+        }
+      }
+
+      // Returns the OG (Taglish) string unless the translate toggle is on English.
+      function getText(og, en) {
+        var btn = document.getElementById('translate-toggle');
+        var isEnglish = btn && btn.classList.contains('active');
+        return isEnglish ? en : og;
+      }
+
+      async function onCellClick(e) {
+        var x = parseInt(e.currentTarget.dataset.x, 10);
+        var y = parseInt(e.currentTarget.dataset.y, 10);
+
+        if (hasPlacedToday()) {
+          applyLockState();
+          return;
+        }
+        if (!selectedColor) {
+          setStatus(getText('Pumili muna ng kulay.', 'Pick a color first.'));
+          return;
+        }
+
+        var prev = e.currentTarget.style.background;
+        paintCell(x, y, selectedColor); // optimistic
+        setStatus(getText('Inilalagay...', 'Placing...'));
+
+        try {
+          var res = await fetch(PLACE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: CMS_CONFIG.userId, x: x, y: y, color: selectedColor })
+          });
+          var data = await res.json();
+
+          if (!res.ok) {
+            paintCell(x, y, prev || '');
+            setStatus(data.error || getText('Hindi nailagay. Subukan ulit.', 'Could not place it. Try again.'));
+            return;
+          }
+
+          markPlacedToday();
+          placedCount++;
+          updateStats();
+          applyLockState();
+          setStatus(getText('Ayos! Salamat sa pixel mo \u2728', 'Nice! Thanks for your pixel \u2728'));
+        } catch (err) {
+          paintCell(x, y, prev || '');
+          setStatus(getText('May problema sa koneksyon. Subukan ulit.', 'Connection hiccup. Try again.'));
+        }
+      }
+
+      async function init() {
+        buildPalette();
+        try {
+          var res = await fetch(cmsUrl('pixels'));
+          if (res.ok) {
+            var data = await res.json();
+            if (Array.isArray(data.palette) && data.palette.length) palette = data.palette;
+            if (data.size) size = data.size;
+            buildPalette();
+            buildCanvas();
+            var pixels = data.pixels || [];
+            placedCount = pixels.length;
+            pixels.forEach(function(p) { paintCell(p.x, p.y, p.color); });
+          } else {
+            buildCanvas();
+          }
+        } catch (err) {
+          buildCanvas();
+        }
+        updateStats();
+        applyLockState();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
+</html>
