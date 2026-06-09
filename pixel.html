@@ -164,6 +164,10 @@
       </div>
     </div>
     <p class="pixel-status" id="pixel-status"></p>
+    <div style="margin-top:1.2rem; display:flex; gap:0.8rem; flex-wrap:wrap; justify-content:center;">
+      <button id="clear-all-btn" style="padding:0.5rem 1.2rem; background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.4); color:#e88e8e; border-radius:8px; cursor:pointer; font-size:0.85rem; font-family:inherit; transition:all 0.2s;">Clear All</button>
+    </div>
+    <p style="color:var(--brown-light); font-size:0.75rem; margin-top:0.8rem; opacity:0.7; text-align:center;">Right-click (or long press) a pixel to erase it.</p>
   </div>
   <!-- Footer -->
   <footer class="footer" style="background: var(--brown); border-top-color: var(--brown-light);">
@@ -249,6 +253,58 @@
         // Try API
         postToAPI(x, y, selectedColor);
       }
+
+      // Right-click to erase individual pixel
+      grid.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        var cell = e.target;
+        if (!cell.classList.contains('pixel-cell')) return;
+        var x = parseInt(cell.dataset.x);
+        var y = parseInt(cell.dataset.y);
+        var key = x + '_' + y;
+        if (pixelData[key]) {
+          delete pixelData[key];
+          cell.style.backgroundColor = 'transparent';
+          cell.classList.remove('placed');
+          saveToLocal();
+          updateCounter();
+        }
+      });
+
+      // Long press for mobile erase
+      var longPressTimer = null;
+      grid.addEventListener('touchstart', function(e) {
+        var cell = e.target;
+        if (!cell.classList.contains('pixel-cell')) return;
+        longPressTimer = setTimeout(function() {
+          var x = parseInt(cell.dataset.x);
+          var y = parseInt(cell.dataset.y);
+          var key = x + '_' + y;
+          if (pixelData[key]) {
+            delete pixelData[key];
+            cell.style.backgroundColor = 'transparent';
+            cell.classList.remove('placed');
+            saveToLocal();
+            updateCounter();
+            showStatus('Pixel erased.', '');
+          }
+        }, 500);
+      });
+      grid.addEventListener('touchend', function() {
+        if (longPressTimer) clearTimeout(longPressTimer);
+      });
+      grid.addEventListener('touchmove', function() {
+        if (longPressTimer) clearTimeout(longPressTimer);
+      });
+
+      // Clear all button
+      document.getElementById('clear-all-btn').addEventListener('click', function() {
+        if (!confirm('Clear the whole canvas? Sure ka ba?')) return;
+        pixelData = {};
+        saveToLocal();
+        renderGrid();
+        showStatus('Canvas cleared. Fresh start.', '');
+      });
       function saveToLocal() {
         try {
           localStorage.setItem(PIXEL_DATA_KEY, JSON.stringify(pixelData));
