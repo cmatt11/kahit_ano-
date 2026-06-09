@@ -22,20 +22,17 @@
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="bookshelf.html">Bookshelf</a></li>
         <li><a href="videos.html">Videos</a></li>
-        <li><a href="echo.html">Echo</a></li>
-        <li><a href="pixel.html">Pixel Art</a></li>
         <li><a href="sidequests.html">Side Quests</a></li>
         <li><a href="links.html">Links</a></li>
+        <li class="nav-more"><span class="nav-more-label">More ▾</span><div class="nav-more-dropdown"><a href="echo.html">Echo</a><a href="pixel.html">Pixel Art</a></div></li>
       </ul>
     </div>
   </nav>
-
   <!-- Page Header -->
   <header class="page-header">
     <h1>Music 🎵</h1>
     <p data-en="my playlists with no consistent theme.">mga playlist ko na walang consistent theme.</p>
   </header>
-
   <!-- Music Content -->
   <section class="section">
     <div class="music-grid" id="music-grid">
@@ -45,12 +42,10 @@
       </div>
     </div>
   </section>
-
   <!-- Footer -->
   <footer class="footer">
     <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
   </footer>
-
   <script src="cms-config.js"></script>
   <script src="script.js"></script>
   <script src="translate.js"></script>
@@ -63,20 +58,17 @@
         // https://open.spotify.com/album/ID?si=...
         const match = url.match(/open\.spotify\.com\/(playlist|track|album)\/([a-zA-Z0-9]+)/);
         if (!match) return null;
-
         const spotifyType = match[1]; // playlist, track, or album
         const id = match[2];
         let height = 352;
         if (spotifyType === 'track') {
           height = 152;
         }
-
         return {
           src: 'https://open.spotify.com/embed/' + spotifyType + '/' + id,
           height: height
         };
       }
-
       function getSoundCloudEmbed(url, type) {
         const encodedUrl = encodeURIComponent(url);
         const height = (type === 'playlist' || url.includes('/sets/')) ? 300 : 166;
@@ -85,7 +77,6 @@
           height: height
         };
       }
-
       function getYouTubeEmbed(url) {
         // Extract video ID from various YouTube URL formats
         let videoId = null;
@@ -102,13 +93,11 @@
           }
         }
         if (!videoId) return null;
-
         return {
           src: 'https://www.youtube.com/embed/' + videoId,
           height: 200
         };
       }
-
       function getEmbed(item) {
         switch (item.platform) {
           case 'spotify':
@@ -121,18 +110,14 @@
             return null;
         }
       }
-
       function createMusicCard(item) {
         const embed = getEmbed(item);
         if (!embed) return null;
-
         const card = document.createElement('div');
         card.className = 'music-card fade-in';
-
         const title = document.createElement('h3');
         title.textContent = item.title;
         card.appendChild(title);
-
         const iframe = document.createElement('iframe');
         iframe.style.borderRadius = '12px';
         iframe.src = embed.src;
@@ -143,10 +128,8 @@
         iframe.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture');
         iframe.loading = 'lazy';
         card.appendChild(iframe);
-
         return card;
       }
-
       function observeFadeIn() {
         const cards = document.querySelectorAll('.music-card.fade-in');
         const observer = new IntersectionObserver(function(entries) {
@@ -157,16 +140,13 @@
             }
           });
         }, { threshold: 0.1 });
-
         cards.forEach(function(card) {
           observer.observe(card);
         });
       }
-
       function loadMusic() {
         const grid = document.getElementById('music-grid');
         const loading = document.getElementById('music-loading');
-
         fetch(cmsUrl('music'))
           .then(function(response) {
             if (!response.ok) throw new Error('Hindi ma-fetch ang data');
@@ -174,20 +154,16 @@
           })
           .then(function(data) {
             const items = data.music || [];
-
             // Remove loading
             if (loading) loading.remove();
-
             if (items.length === 0) {
               grid.innerHTML = '<div class="music-loading"><p>Wala pang music dito... parang playlist ko pag walang wifi 😅</p></div>';
               return;
             }
-
             items.forEach(function(item) {
               const card = createMusicCard(item);
               if (card) grid.appendChild(card);
             });
-
             // Setup fade-in animations
             observeFadeIn();
           })
@@ -197,7 +173,6 @@
             grid.innerHTML = '<div class="music-loading"><p>Ay may error sa pag-load ng music. Baka nag-iinarte yung internet mo lol 🙃</p></div>';
           });
       }
-
       // Start loading when DOM is ready
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', loadMusic);

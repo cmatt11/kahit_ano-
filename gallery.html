@@ -22,20 +22,17 @@
         <li><a href="gallery.html" class="active">Gallery</a></li>
         <li><a href="bookshelf.html">Bookshelf</a></li>
         <li><a href="videos.html">Videos</a></li>
-        <li><a href="echo.html">Echo</a></li>
-        <li><a href="pixel.html">Pixel Art</a></li>
         <li><a href="sidequests.html">Side Quests</a></li>
         <li><a href="links.html">Links</a></li>
+        <li class="nav-more"><span class="nav-more-label">More ▾</span><div class="nav-more-dropdown"><a href="echo.html">Echo</a><a href="pixel.html">Pixel Art</a></div></li>
       </ul>
     </div>
   </nav>
-
   <!-- Page Header -->
   <header class="page-header">
     <h1 data-en="Gallery">Gallery 📸🎬</h1>
     <p data-en="my personal pinterest board and mini cinema, pero dito.">my personal pinterest board at mini cinema, pero dito.</p>
   </header>
-
   <!-- Gallery Content -->
   <section class="section">
     <div class="gallery-grid" id="gallery-grid">
@@ -44,34 +41,28 @@
       </div>
     </div>
   </section>
-
   <script src="cms-config.js"></script>
   <script>
     function convertImageUrl(url) {
       if (!url) return '';
-
       // Handle CMS-relative /cdn/ URLs (R2 uploads)
       const cmsOrigin = CMS_CONFIG.baseUrl.replace('/api/public', '');
       if (url.startsWith('/cdn/')) {
         return cmsOrigin + url;
       }
-
       // Handle drive.google.com/file/d/FILE_ID/view format
       const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
       if (driveFileMatch) {
         return 'https://lh3.googleusercontent.com/d/' + driveFileMatch[1];
       }
-
       // Handle drive.google.com/open?id=FILE_ID format
       const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([^&\?]+)/);
       if (driveOpenMatch) {
         return 'https://lh3.googleusercontent.com/d/' + driveOpenMatch[1];
       }
-
       // Direct URL (imgur, etc.) - use as-is
       return url;
     }
-
     function getYouTubeVideoId(url) {
       if (!url) return null;
       // Match youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
@@ -85,7 +76,6 @@
       }
       return null;
     }
-
     function getDriveVideoId(url) {
       if (!url) return null;
       const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
@@ -94,45 +84,35 @@
       if (driveOpenMatch) return driveOpenMatch[1];
       return null;
     }
-
     function isYouTubeUrl(url) {
       return /youtube\.com|youtu\.be/.test(url);
     }
-
     function isDriveUrl(url) {
       return /drive\.google\.com/.test(url);
     }
-
     function createPhotoItem(imageUrl, caption) {
       const item = document.createElement('div');
       item.className = 'gallery-item fade-in';
-
       const img = document.createElement('img');
       img.src = convertImageUrl(imageUrl);
       img.alt = caption || 'Photo';
       img.loading = 'lazy';
       item.appendChild(img);
-
       if (caption) {
         const overlay = document.createElement('div');
         overlay.className = 'gallery-caption';
         overlay.textContent = caption;
         item.appendChild(overlay);
       }
-
       return item;
     }
-
     function createVideoItem(url, caption) {
       const item = document.createElement('div');
       item.className = 'gallery-item gallery-video-item fade-in';
-
       const embedWrapper = document.createElement('div');
       embedWrapper.className = 'gallery-video-embed';
-
       const youtubeId = getYouTubeVideoId(url);
       const driveId = getDriveVideoId(url);
-
       if (youtubeId) {
         const iframe = document.createElement('iframe');
         iframe.setAttribute('allowfullscreen', '');
@@ -158,19 +138,15 @@
         video.src = url.startsWith('/cdn/') ? cmsOrigin + url : url;
         embedWrapper.appendChild(video);
       }
-
       item.appendChild(embedWrapper);
-
       if (caption) {
         const captionEl = document.createElement('div');
         captionEl.className = 'gallery-video-caption';
         captionEl.textContent = caption;
         item.appendChild(captionEl);
       }
-
       return item;
     }
-
     function observeFadeIn(elements) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -182,65 +158,50 @@
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
       });
-
       elements.forEach(el => observer.observe(el));
     }
-
     async function loadGallery() {
       const grid = document.getElementById('gallery-grid');
       const loading = document.getElementById('gallery-loading');
-
       try {
         const response = await fetch(cmsUrl('gallery'));
         if (!response.ok) throw new Error('Failed to fetch');
-
         const data = await response.json();
         const rows = data.gallery || [];
-
         // Remove loading
         loading.remove();
-
         if (rows.length === 0) {
           grid.innerHTML = '<div class="gallery-empty"><p>wala pang laman dito... mag-uupload ako soon, promise! cheka lang</p></div>';
           return;
         }
-
         const items = [];
         rows.forEach(function(row) {
           const url = row.url || '';
           const caption = row.caption || '';
           const type = (row.type || 'photo').toLowerCase().trim();
-
           if (!url) return;
-
           var item;
           if (type === 'video') {
             item = createVideoItem(url, caption);
           } else {
             item = createPhotoItem(url, caption);
           }
-
           grid.appendChild(item);
           items.push(item);
         });
-
         // Observe all new items for fade-in animation
         observeFadeIn(items);
-
       } catch (error) {
         loading.remove();
         grid.innerHTML = '<div class="gallery-empty"><p>ay nako, nag-iinarte yung internet mo lol. di ko ma-load yung gallery. try mo ulit mamaya ha!</p></div>';
       }
     }
-
     loadGallery();
   </script>
-
   <!-- Footer -->
   <footer class="footer">
     <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
   </footer>
-
   <script src="script.js"></script>
   <script src="translate.js"></script>
 </body>

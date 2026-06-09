@@ -11,24 +11,20 @@
       margin: 0 auto;
       padding: 2rem 1.5rem 4rem;
     }
-
     .suggest-header {
       text-align: center;
       margin-bottom: 2.5rem;
     }
-
     .suggest-header h1 {
       font-size: 1.8rem;
       color: var(--brown);
       margin-bottom: 0.5rem;
     }
-
     .suggest-header p {
       color: var(--brown-light);
       font-size: 0.95rem;
       line-height: 1.5;
     }
-
     .suggest-form {
       background: var(--cream);
       border: 1px solid var(--brown-lighter);
@@ -36,11 +32,9 @@
       padding: 2rem;
       box-shadow: 0 4px 16px rgba(92, 61, 46, 0.08);
     }
-
     .form-group {
       margin-bottom: 1.3rem;
     }
-
     .form-label {
       display: block;
       font-size: 0.85rem;
@@ -48,11 +42,9 @@
       color: var(--brown);
       margin-bottom: 0.4rem;
     }
-
     .form-label .required {
       color: #e74c3c;
     }
-
     .form-input,
     .form-textarea,
     .form-select {
@@ -66,7 +58,6 @@
       color: var(--brown);
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-
     .form-input:focus,
     .form-textarea:focus,
     .form-select:focus {
@@ -74,17 +65,14 @@
       border-color: var(--brown-light);
       box-shadow: 0 0 0 3px rgba(92, 61, 46, 0.1);
     }
-
     .form-textarea {
       min-height: 80px;
       resize: vertical;
     }
-
     .form-input::placeholder,
     .form-textarea::placeholder {
       color: var(--brown-lighter);
     }
-
     .submit-btn {
       width: 100%;
       padding: 0.85rem;
@@ -98,46 +86,37 @@
       cursor: pointer;
       transition: background 0.2s ease, transform 0.1s ease;
     }
-
     .submit-btn:hover {
       background: var(--brown-light);
     }
-
     .submit-btn:active {
       transform: scale(0.98);
     }
-
     .submit-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
-
     /* Success state */
     .suggest-success {
       text-align: center;
       padding: 2rem;
       display: none;
     }
-
     .suggest-success.visible {
       display: block;
     }
-
     .suggest-success-icon {
       font-size: 3rem;
       margin-bottom: 1rem;
     }
-
     .suggest-success h2 {
       color: var(--brown);
       margin-bottom: 0.5rem;
     }
-
     .suggest-success p {
       color: var(--brown-light);
       line-height: 1.5;
     }
-
     .suggest-success .back-link {
       display: inline-block;
       margin-top: 1.5rem;
@@ -149,11 +128,9 @@
       font-size: 0.9rem;
       transition: background 0.2s ease;
     }
-
     .suggest-success .back-link:hover {
       background: var(--brown-light);
     }
-
     /* Error state */
     .form-error {
       background: #fce4ec;
@@ -164,27 +141,22 @@
       margin-bottom: 1rem;
       display: none;
     }
-
     .form-error.visible {
       display: block;
     }
-
     .form-footer {
       text-align: center;
       margin-top: 1.5rem;
       font-size: 0.8rem;
       color: var(--brown-lighter);
     }
-
     @media (max-width: 600px) {
       .suggest-container {
         padding: 1.5rem 1rem 3rem;
       }
-
       .suggest-form {
         padding: 1.5rem;
       }
-
       .suggest-header h1 {
         font-size: 1.5rem;
       }
@@ -207,35 +179,29 @@
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="bookshelf.html">Bookshelf</a></li>
         <li><a href="videos.html">Videos</a></li>
-        <li><a href="echo.html">Echo</a></li>
-        <li><a href="pixel.html">Pixel Art</a></li>
         <li><a href="sidequests.html">Side Quests</a></li>
         <li><a href="links.html">Links</a></li>
+        <li class="nav-more"><span class="nav-more-label">More ▾</span><div class="nav-more-dropdown"><a href="echo.html">Echo</a><a href="pixel.html">Pixel Art</a></div></li>
       </ul>
     </div>
   </nav>
-
   <div class="suggest-container">
     <!-- Header -->
     <div class="suggest-header">
       <h1>Suggest a Book &#128218;</h1>
       <p>Got a good read you think I should check out? Drop it here!<br>No account needed, anonymous ang peg.</p>
     </div>
-
     <!-- Form -->
     <form class="suggest-form" id="suggest-form">
       <div class="form-error" id="form-error"></div>
-
       <div class="form-group">
         <label class="form-label">Book Title <span class="required">*</span></label>
         <input class="form-input" id="sug-title" type="text" placeholder="e.g. The Midnight Library" required>
       </div>
-
       <div class="form-group">
         <label class="form-label">Author <span class="required">*</span></label>
         <input class="form-input" id="sug-author" type="text" placeholder="e.g. Matt Haig" required>
       </div>
-
       <div class="form-group">
         <label class="form-label">Genre <span class="required">*</span></label>
         <select class="form-select" id="sug-genre" required>
@@ -256,19 +222,15 @@
           <option value="Other">Other</option>
         </select>
       </div>
-
       <div class="form-group">
         <label class="form-label">Why should I read it? (optional)</label>
         <textarea class="form-textarea" id="sug-note" placeholder="Tell me why it's good... or just say 'trust me bro'"></textarea>
       </div>
-
       <button type="submit" class="submit-btn" id="submit-btn">Submit Suggestion</button>
-
       <div class="form-footer">
         Max 3 suggestions per day. Quality over quantity, 'di ba? &#128521;
       </div>
     </form>
-
     <!-- Success -->
     <div class="suggest-success" id="suggest-success">
       <div class="suggest-success-icon">&#127881;</div>
@@ -277,12 +239,10 @@
       <a href="bookshelf.html" class="back-link">&larr; Back to Bookshelf</a>
     </div>
   </div>
-
   <!-- Footer -->
   <footer class="footer">
     <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
   </footer>
-
   <script src="cms-config.js"></script>
   <script src="script.js"></script>
   <script>
@@ -291,50 +251,39 @@
       var errorEl = document.getElementById('form-error');
       var submitBtn = document.getElementById('submit-btn');
       var successEl = document.getElementById('suggest-success');
-
       function showError(msg) {
         errorEl.textContent = msg;
         errorEl.classList.add('visible');
       }
-
       function hideError() {
         errorEl.classList.remove('visible');
       }
-
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
         hideError();
-
         var title = document.getElementById('sug-title').value.trim();
         var author = document.getElementById('sug-author').value.trim();
         var genre = document.getElementById('sug-genre').value;
         var note = document.getElementById('sug-note').value.trim();
-
         if (!title || !author || !genre) {
           showError('Fill in all the required fields naman, please!');
           return;
         }
-
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
-
         try {
           var res = await fetch(CMS_CONFIG.baseUrl.replace('/api/public', '') + '/api/public/suggest-book', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title: title, author: author, genre: genre, note: note })
           });
-
           var data = await res.json();
-
           if (!res.ok) {
             throw new Error(data.error || 'Something went wrong');
           }
-
           // Show success
           form.style.display = 'none';
           successEl.classList.add('visible');
-
         } catch(err) {
           showError(err.message || 'Failed to submit. Try again later!');
           submitBtn.disabled = false;

@@ -108,7 +108,104 @@ img {
   color: var(--white);
 }
 
-/* Mobile menu */
+/* Desktop More Dropdown */
+.nav-more {
+  position: relative;
+}
+
+.nav-more-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--brown);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-block;
+}
+
+.nav-more-label:hover {
+  background: var(--pink-light);
+  color: var(--brown);
+}
+
+.nav-more-label.active {
+  background: var(--brown);
+  color: var(--white);
+}
+
+.nav-more-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: rgba(253, 248, 244, 0.98);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--brown-lighter);
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: 0 8px 24px rgba(92, 61, 46, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+  min-width: 140px;
+  z-index: 1001;
+}
+
+.nav-more:hover .nav-more-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.nav-more-dropdown a {
+  display: block;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--brown);
+  border-radius: 8px;
+  transition: all var(--transition);
+  text-decoration: none;
+}
+
+.nav-more-dropdown a:hover {
+  background: var(--pink-light);
+}
+
+.nav-more-dropdown a.active {
+  background: var(--brown);
+  color: var(--white);
+}
+
+/* Hide More dropdown on mobile - show items in flat list */
+@media (max-width: 768px) {
+  .nav-more-dropdown {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    background: none;
+    backdrop-filter: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    min-width: auto;
+  }
+
+  .nav-more-label {
+    display: none;
+  }
+
+  .nav-more-dropdown a {
+    font-size: 1rem;
+    padding: 0.8rem 1.2rem;
+    width: 100%;
+    text-align: center;
+  }
+}
 .nav-toggle {
   display: none;
   background: none;

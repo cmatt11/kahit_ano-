@@ -22,20 +22,17 @@
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="bookshelf.html">Bookshelf</a></li>
         <li><a href="videos.html" class="active">Videos</a></li>
-        <li><a href="echo.html">Echo</a></li>
-        <li><a href="pixel.html">Pixel Art</a></li>
         <li><a href="sidequests.html">Side Quests</a></li>
         <li><a href="links.html">Links</a></li>
+        <li class="nav-more"><span class="nav-more-label">More ▾</span><div class="nav-more-dropdown"><a href="echo.html">Echo</a><a href="pixel.html">Pixel Art</a></div></li>
       </ul>
     </div>
   </nav>
-
   <!-- Page Header -->
   <header class="page-header">
     <h1>Videos 🎬</h1>
     <p>funny clips, comfort videos, and content I keep rewatching</p>
   </header>
-
   <!-- Videos Content -->
   <section class="section">
     <div class="videos-grid" id="videos-grid">
@@ -44,68 +41,50 @@
       </div>
     </div>
   </section>
-
   <script src="cms-config.js"></script>
   <script>
     function extractYouTubeID(url) {
       if (!url) return null;
-
       // youtube.com/watch?v=VIDEO_ID
       let match = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
       if (match) return match[1];
-
       // youtu.be/VIDEO_ID
       match = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
       if (match) return match[1];
-
       // youtube.com/embed/VIDEO_ID
       match = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
       if (match) return match[1];
-
       // youtube.com/shorts/VIDEO_ID
       match = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
       if (match) return match[1];
-
       return null;
     }
-
     function createVideoCard(videoUrl, title, caption) {
       const videoId = extractYouTubeID(videoUrl);
       if (!videoId) return null;
-
       const card = document.createElement('div');
       card.className = 'video-card fade-in';
-
       const embedDiv = document.createElement('div');
       embedDiv.className = 'video-embed';
-
       const iframe = document.createElement('iframe');
       iframe.src = 'https://www.youtube.com/embed/' + videoId;
       iframe.title = title || 'Video';
       iframe.frameBorder = '0';
       iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
       iframe.allowFullscreen = true;
-
       embedDiv.appendChild(iframe);
-
       const infoDiv = document.createElement('div');
       infoDiv.className = 'video-info';
-
       const h3 = document.createElement('h3');
       h3.textContent = title || 'Untitled';
-
       const p = document.createElement('p');
       p.textContent = caption || '';
-
       infoDiv.appendChild(h3);
       infoDiv.appendChild(p);
-
       card.appendChild(embedDiv);
       card.appendChild(infoDiv);
-
       return card;
     }
-
     function observeFadeIn(elements) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -117,35 +96,27 @@
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
       });
-
       elements.forEach(el => observer.observe(el));
     }
-
     async function loadVideos() {
       const grid = document.getElementById('videos-grid');
       const loading = document.getElementById('videos-loading');
-
       try {
         const response = await fetch(cmsUrl('videos'));
         if (!response.ok) throw new Error('Failed to fetch');
-
         const data = await response.json();
         const rows = data.videos || [];
-
         // Remove loading
         loading.remove();
-
         if (rows.length === 0) {
           grid.innerHTML = '<div class="videos-empty"><p>wala pang videos dito... babalik ako soon!</p></div>';
           return;
         }
-
         const cards = [];
         rows.forEach(function(item) {
           const videoUrl = item.video_url || '';
           const title = item.title || '';
           const caption = item.caption || '';
-
           if (videoUrl) {
             const card = createVideoCard(videoUrl, title, caption);
             if (card) {
@@ -154,29 +125,23 @@
             }
           }
         });
-
         if (cards.length === 0) {
           grid.innerHTML = '<div class="videos-empty"><p>wala pang videos dito... babalik ako soon!</p></div>';
           return;
         }
-
         // Observe all new cards for fade-in animation
         observeFadeIn(cards);
-
       } catch (error) {
         loading.remove();
         grid.innerHTML = '<div class="videos-empty"><p>ay sorry, di ko ma-load yung videos right now. try mo ulit mamaya!</p></div>';
       }
     }
-
     loadVideos();
   </script>
-
   <!-- Footer -->
   <footer class="footer">
     <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
   </footer>
-
   <script src="script.js"></script>
   <script src="translate.js"></script>
 </body>

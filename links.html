@@ -22,20 +22,16 @@
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="bookshelf.html">Bookshelf</a></li>
         <li><a href="videos.html">Videos</a></li>
-        <li><a href="echo.html">Echo</a></li>
-        <li><a href="pixel.html">Pixel Art</a></li>
         <li><a href="sidequests.html">Side Quests</a></li>
         <li><a href="links.html" class="active">Links</a></li>
       </ul>
     </div>
   </nav>
-
   <!-- Page Header -->
   <header class="page-header">
     <h1>Links 🔗</h1>
     <p>where else you can find me on the internet</p>
   </header>
-
   <!-- Links Content -->
   <div class="links-container">
     <a href="https://portfolio.ochina1123.workers.dev/" target="_blank" rel="noopener noreferrer" class="link-card fade-in">
@@ -45,7 +41,6 @@
         <p>My serious side. Projects, resume, the works.</p>
       </div>
     </a>
-
     <a href="#" class="link-card fade-in">
       <div class="link-icon">🐦</div>
       <div class="link-text">
@@ -53,7 +48,6 @@
         <p>Coming soon! Where I post even shorter tots.</p>
       </div>
     </a>
-
     <a href="#" class="link-card fade-in">
       <div class="link-icon">📷</div>
       <div class="link-text">
@@ -61,7 +55,6 @@
         <p>Coming soon! Photo dumps and stories.</p>
       </div>
     </a>
-
     <a href="https://github.com/cmatt11" target="_blank" rel="noopener noreferrer" class="link-card fade-in">
       <div class="link-icon">💻</div>
       <div class="link-text">
@@ -69,7 +62,6 @@
         <p>Where the code lives.</p>
       </div>
     </a>
-
     <a href="https://open.spotify.com/user/313mgpprxnjvpabmugfnjygsd4im?si=f9514764d4a34391" target="_blank" rel="noopener noreferrer" class="link-card fade-in">
       <div class="link-icon">🎵</div>
       <div class="link-text">
@@ -78,12 +70,10 @@
       </div>
     </a>
   </div>
-
   <!-- Footer -->
   <footer class="footer">
     <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
   </footer>
-
   <script src="cms-config.js"></script>
   <script src="script.js"></script>
   <script src="translate.js"></script>
@@ -92,37 +82,29 @@
       function renderLinks(links) {
         var container = document.querySelector('.links-container');
         if (!container || links.length === 0) return;
-
         // Clear existing static links and replace with dynamic
         container.innerHTML = '';
-
         links.forEach(function(link) {
           var a = document.createElement('a');
           a.href = link.url || '#';
           a.target = '_blank';
           a.rel = 'noopener noreferrer';
           a.className = 'link-card fade-in';
-
           var iconDiv = document.createElement('div');
           iconDiv.className = 'link-icon';
           iconDiv.textContent = link.icon || '🔗';
           a.appendChild(iconDiv);
-
           var textDiv = document.createElement('div');
           textDiv.className = 'link-text';
-
           var h3 = document.createElement('h3');
           h3.textContent = link.title || '';
           textDiv.appendChild(h3);
-
           var p = document.createElement('p');
           p.textContent = link.description || '';
           textDiv.appendChild(p);
-
           a.appendChild(textDiv);
           container.appendChild(a);
         });
-
         // Observe for fade-in
         var cards = container.querySelectorAll('.fade-in');
         var observer = new IntersectionObserver(function(entries) {
@@ -135,7 +117,6 @@
         }, { threshold: 0.1 });
         cards.forEach(function(card) { observer.observe(card); });
       }
-
       fetch(cmsUrl('links'))
         .then(function(r) {
           if (!r.ok) throw new Error('Failed');

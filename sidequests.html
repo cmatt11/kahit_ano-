@@ -22,27 +22,23 @@
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="bookshelf.html">Bookshelf</a></li>
         <li><a href="videos.html">Videos</a></li>
-        <li><a href="echo.html">Echo</a></li>
-        <li><a href="pixel.html">Pixel Art</a></li>
         <li><a href="sidequests.html" class="active">Side Quests</a></li>
         <li><a href="links.html">Links</a></li>
+        <li class="nav-more"><span class="nav-more-label">More ▾</span><div class="nav-more-dropdown"><a href="echo.html">Echo</a><a href="pixel.html">Pixel Art</a></div></li>
       </ul>
     </div>
   </nav>
-
   <!-- Page Header -->
   <header class="page-header">
     <h1 data-en="My Side Quests in Life 🎯">Mga Side Quest Ko Sa Buhay 🎯</h1>
     <p data-en="academics isn't my whole personality okay. I have other stuff HAHAHAH just kidding">hindi lang acads ang personality ko ha. may iba pa HAHAHAH charot</p>
   </header>
-
   <!-- Side Quests Grid -->
   <section class="section">
     <div class="section-header fade-in">
       <h2>pick your poison</h2>
       <p data-en="stuff that ate up my time besides acads and existential dread">mga bagay na kinain ng oras ko bukod sa acads at existential dread</p>
     </div>
-
     <div class="preview-row">
       <a href="poems.html" class="preview-card fade-in">
         <div class="preview-emoji">📝</div>
@@ -50,28 +46,24 @@
         <p data-en="Poems that hit me right in the chest. Yes, I read poetry. Surprised? BWAHAHAHA">Mga tula na tumama sa puso ko. Oo, nagbabasa ako ng poetry. Surprise? BWAHAHAHA</p>
         <span class="preview-link" data-en="Read &rarr;">Basahin &rarr;</span>
       </a>
-
       <a href="films.html" class="preview-card fade-in">
         <div class="preview-emoji">🎬</div>
         <h3>Films & Shows</h3>
         <p data-en="Comfort movies and shows I rewatch over and over. No shame.">Comfort movies at shows na paulit-ulit kong pinapanood. No shame.</p>
         <span class="preview-link" data-en="Watch &rarr;">Panoorin &rarr;</span>
       </a>
-
       <a href="astronomy.html" class="preview-card fade-in">
         <div class="preview-emoji">🌌</div>
         <h3>Astronomy</h3>
         <p data-en="3am stargazing hours. The kind where you look up and suddenly have an existential moment.">3am star gazing hours. Yung tipong nakatingala ka sa langit tapos na-eexist ka bigla.</p>
         <span class="preview-link" data-en="Look up &rarr;">Tumingin sa taas &rarr;</span>
       </a>
-
       <a href="games.html" class="preview-card fade-in">
         <div class="preview-emoji">🎮</div>
         <h3>Games</h3>
         <p data-en="For de-stressing. Sometimes for adding stress. Depends on ranked wahahahha">Pang tanggal stress. Minsan pang dagdag stress. Depende sa ranked wahahahha</p>
         <span class="preview-link" data-en="Let's play &rarr;">Laro tayo &rarr;</span>
       </a>
-
       <a href="psychology.html" class="preview-card fade-in">
         <div class="preview-emoji">🧠</div>
         <h3>Psychology</h3>
@@ -80,12 +72,10 @@
       </a>
     </div>
   </section>
-
   <!-- Footer -->
   <footer class="footer">
     <p>made with <span class="footer-heart">&hearts;</span> by carla &middot; 2024</p>
   </footer>
-
   <script src="cms-config.js"></script>
   <script src="script.js"></script>
   <script src="translate.js"></script>
@@ -94,7 +84,6 @@
       function renderSideQuests(quests) {
         var container = document.querySelector('.preview-row');
         if (!container || quests.length === 0) return;
-
         // Map of known page links for side quests by title
         var pageMap = {
           'poems': 'poems.html',
@@ -104,37 +93,29 @@
           'games': 'games.html',
           'psychology': 'psychology.html'
         };
-
         // Clear existing static content and replace with dynamic
         container.innerHTML = '';
-
         quests.forEach(function(quest) {
           var href = pageMap[(quest.title || '').toLowerCase()] || ('quest.html?id=' + quest.id);
           var card = document.createElement('a');
           card.href = href;
           card.className = 'preview-card fade-in';
-
           var emoji = document.createElement('div');
           emoji.className = 'preview-emoji';
           emoji.textContent = quest.emoji || '🎯';
           card.appendChild(emoji);
-
           var h3 = document.createElement('h3');
           h3.textContent = quest.title || '';
           card.appendChild(h3);
-
           var p = document.createElement('p');
           p.textContent = quest.description || '';
           card.appendChild(p);
-
           var link = document.createElement('span');
           link.className = 'preview-link';
           link.innerHTML = 'Explore &rarr;';
           card.appendChild(link);
-
           container.appendChild(card);
         });
-
         // Observe for fade-in
         var cards = container.querySelectorAll('.fade-in');
         var observer = new IntersectionObserver(function(entries) {
@@ -147,7 +128,6 @@
         }, { threshold: 0.1 });
         cards.forEach(function(card) { observer.observe(card); });
       }
-
       fetch(cmsUrl('side-quests'))
         .then(function(r) {
           if (!r.ok) throw new Error('Failed');
