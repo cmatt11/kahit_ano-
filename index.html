@@ -40,6 +40,15 @@
     </div>
   </section>
 
+  <!-- Pinned Section -->
+  <section class="section pinned-section" id="pinned-section" style="display: none;">
+    <div class="section-header fade-in">
+      <h2>Pinned 📌</h2>
+      <p data-en="Stuff I want you to see first. You're welcome.">Mga bagay na gusto kong makita mo agad. De wala lang haha</p>
+    </div>
+    <div class="pinned-grid" id="pinned-grid"></div>
+  </section>
+
   <!-- Preview Sections -->
   <section class="section">
     <div class="section-header fade-in">
@@ -99,5 +108,385 @@
 
   <script src="script.js"></script>
   <script src="translate.js"></script>
+
+  <script>
+    (function() {
+      const TOTS_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1-L_RdSX8rsLNTGWaF1Agi-U9Bhd7qmWdHXPYZxXm9lG8H32cl-t5urFSOVuKORHE9EynIgQ6n_i3/pub?output=csv';
+      const GALLERY_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQBmQDQVE4_hp-ggUu8KWsSrCvz7x1YQtWO_mIOSbp47WEuDkV__qvS77u1D3_zvuypTDv_MypUS5MM/pub?output=csv';
+      const MUSIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQSkHiIJi2oFsV8BE7KOC67luuWHntXXH8JNDS3-XKms_RyhoHmvMNyBPD6HTVhDD5sN48pXCnnYVhw/pub?output=csv';
+
+      function parseCSV(csvText) {
+        const rows = [];
+        let current = '';
+        let inQuotes = false;
+        let row = [];
+
+        for (let i = 0; i < csvText.length; i++) {
+          const char = csvText[i];
+          const next = csvText[i + 1];
+
+          if (inQuotes) {
+            if (char === '"' && next === '"') {
+              current += '"';
+              i++;
+            } else if (char === '"') {
+              inQuotes = false;
+            } else {
+              current += char;
+            }
+          } else {
+            if (char === '"') {
+              inQuotes = true;
+            } else if (char === ',') {
+              row.push(current.trim());
+              current = '';
+            } else if (char === '\n' || (char === '\r' && next === '\n')) {
+              row.push(current.trim());
+              current = '';
+              if (row.length > 0 && row.some(cell => cell !== '')) {
+                rows.push(row);
+              }
+              row = [];
+              if (char === '\r') i++;
+            } else {
+              current += char;
+            }
+          }
+        }
+
+        if (current || row.length > 0) {
+          row.push(current.trim());
+          if (row.some(cell => cell !== '')) {
+            rows.push(row);
+          }
+        }
+
+        return rows;
+      }
+
+      function isPinned(value) {
+        return value && value.trim().toLowerCase() === 'p';
+      }
+
+      // --- Tot card ---
+      function createPinnedTot(thought, tags, date) {
+        const card = document.createElement('div');
+        card.className = 'pinned-item pinned-tot fade-in';
+
+        const badge = document.createElement('span');
+        badge.className = 'pin-badge';
+        badge.textContent = '📌';
+        card.appendChild(badge);
+
+        const inner = document.createElement('div');
+        inner.className = 'tot-card';
+
+        const meta = document.createElement('div');
+        meta.className = 'tot-meta';
+        meta.textContent = date || '';
+
+        const p = document.createElement('p');
+        p.textContent = thought;
+
+        inner.appendChild(meta);
+        inner.appendChild(p);
+
+        if (tags) {
+          const tagsDiv = document.createElement('div');
+          tagsDiv.className = 'tot-tags';
+          tags.split(',').forEach(function(tag) {
+            const span = document.createElement('span');
+            const trimmed = tag.trim();
+            span.textContent = trimmed.startsWith('#') ? trimmed : '#' + trimmed;
+            tagsDiv.appendChild(span);
+          });
+          inner.appendChild(tagsDiv);
+        }
+
+        card.appendChild(inner);
+        return card;
+      }
+
+      // --- Gallery item ---
+      function convertImageUrl(url) {
+        if (!url) return '';
+        const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+        if (driveFileMatch) return 'https://lh3.googleusercontent.com/d/' + driveFileMatch[1];
+        const driveOpenMatch = url.match(/drive\.google\.com\/open\?id=([^&\?]+)/);
+        if (driveOpenMatch) return 'https://lh3.googleusercontent.com/d/' + driveOpenMatch[1];
+        return url;
+      }
+
+      function getYouTubeVideoId(url) {
+        if (!url) return null;
+        const patterns = [
+          /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+          /youtube\.com\/.*[?&]v=([a-zA-Z0-9_-]{11})/
+        ];
+        for (const pattern of patterns) {
+          const match = url.match(pattern);
+          if (match) return match[1];
+        }
+        return null;
+      }
+
+      function getDriveVideoId(url) {
+        if (!url) return null;
+        const match = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/) || url.match(/drive\.google\.com\/open\?id=([^&\?]+)/);
+        return match ? match[1] : null;
+      }
+
+      function createPinnedGalleryPhoto(imageUrl, caption) {
+        const card = document.createElement('div');
+        card.className = 'pinned-item pinned-gallery fade-in';
+
+        const badge = document.createElement('span');
+        badge.className = 'pin-badge';
+        badge.textContent = '📌';
+        card.appendChild(badge);
+
+        const inner = document.createElement('div');
+        inner.className = 'gallery-item';
+
+        const img = document.createElement('img');
+        img.src = convertImageUrl(imageUrl);
+        img.alt = caption || 'Pinned photo';
+        img.loading = 'lazy';
+        inner.appendChild(img);
+
+        if (caption) {
+          const overlay = document.createElement('div');
+          overlay.className = 'gallery-caption';
+          overlay.textContent = caption;
+          inner.appendChild(overlay);
+        }
+
+        card.appendChild(inner);
+        return card;
+      }
+
+      function createPinnedGalleryVideo(url, caption) {
+        const card = document.createElement('div');
+        card.className = 'pinned-item pinned-gallery-video fade-in';
+
+        const badge = document.createElement('span');
+        badge.className = 'pin-badge';
+        badge.textContent = '📌';
+        card.appendChild(badge);
+
+        const inner = document.createElement('div');
+        inner.className = 'gallery-item gallery-video-item';
+        inner.style.gridColumn = 'auto';
+
+        const embedWrapper = document.createElement('div');
+        embedWrapper.className = 'gallery-video-embed';
+
+        const iframe = document.createElement('iframe');
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('loading', 'lazy');
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+
+        const youtubeId = getYouTubeVideoId(url);
+        if (youtubeId) {
+          iframe.src = 'https://www.youtube.com/embed/' + youtubeId;
+        } else {
+          const driveId = getDriveVideoId(url);
+          if (driveId) {
+            iframe.src = 'https://drive.google.com/file/d/' + driveId + '/preview';
+          }
+        }
+
+        embedWrapper.appendChild(iframe);
+        inner.appendChild(embedWrapper);
+
+        if (caption) {
+          const captionEl = document.createElement('div');
+          captionEl.className = 'gallery-video-caption';
+          captionEl.textContent = caption;
+          inner.appendChild(captionEl);
+        }
+
+        card.appendChild(inner);
+        return card;
+      }
+
+      // --- Music item ---
+      function getSpotifyEmbed(url, type) {
+        const match = url.match(/open\.spotify\.com\/(playlist|track|album)\/([a-zA-Z0-9]+)/);
+        if (!match) return null;
+        const spotifyType = match[1];
+        const id = match[2];
+        return {
+          src: 'https://open.spotify.com/embed/' + spotifyType + '/' + id,
+          height: spotifyType === 'track' ? 152 : 352
+        };
+      }
+
+      function getSoundCloudEmbed(url, type) {
+        const encodedUrl = encodeURIComponent(url);
+        const height = (type === 'playlist' || url.includes('/sets/')) ? 300 : 166;
+        return {
+          src: 'https://w.soundcloud.com/player/?url=' + encodedUrl + '&color=%235c3d2e&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false',
+          height: height
+        };
+      }
+
+      function getYouTubeMusicEmbed(url) {
+        let videoId = null;
+        const patterns = [/[?&]v=([a-zA-Z0-9_-]{11})/, /youtu\.be\/([a-zA-Z0-9_-]{11})/, /embed\/([a-zA-Z0-9_-]{11})/];
+        for (const pattern of patterns) {
+          const match = url.match(pattern);
+          if (match) { videoId = match[1]; break; }
+        }
+        if (!videoId) return null;
+        return { src: 'https://www.youtube.com/embed/' + videoId, height: 200 };
+      }
+
+      function getMusicEmbed(platform, url, type) {
+        switch (platform) {
+          case 'spotify': return getSpotifyEmbed(url, type);
+          case 'soundcloud': return getSoundCloudEmbed(url, type);
+          case 'youtube': return getYouTubeMusicEmbed(url);
+          default: return null;
+        }
+      }
+
+      function createPinnedMusic(title, url, type, platform) {
+        const embed = getMusicEmbed(platform, url, type);
+        if (!embed) return null;
+
+        const card = document.createElement('div');
+        card.className = 'pinned-item pinned-music fade-in';
+
+        const badge = document.createElement('span');
+        badge.className = 'pin-badge';
+        badge.textContent = '📌';
+        card.appendChild(badge);
+
+        const inner = document.createElement('div');
+        inner.className = 'music-card';
+
+        const h3 = document.createElement('h3');
+        h3.textContent = title;
+        inner.appendChild(h3);
+
+        const iframe = document.createElement('iframe');
+        iframe.style.borderRadius = '12px';
+        iframe.src = embed.src;
+        iframe.width = '100%';
+        iframe.height = embed.height;
+        iframe.frameBorder = '0';
+        iframe.setAttribute('allowfullscreen', '');
+        iframe.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture');
+        iframe.loading = 'lazy';
+        inner.appendChild(iframe);
+
+        card.appendChild(inner);
+        return card;
+      }
+
+      // --- Fade in observer ---
+      function observeFadeIn(elements) {
+        const observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        elements.forEach(function(el) { observer.observe(el); });
+      }
+
+      // --- Fetch and render pinned items ---
+      async function loadPinned() {
+        const section = document.getElementById('pinned-section');
+        const grid = document.getElementById('pinned-grid');
+        const items = [];
+
+        try {
+          const [totsRes, galleryRes, musicRes] = await Promise.allSettled([
+            fetch(TOTS_CSV),
+            fetch(GALLERY_CSV),
+            fetch(MUSIC_CSV)
+          ]);
+
+          // Process Tots (columns: thought, tags, date, pinned)
+          if (totsRes.status === 'fulfilled' && totsRes.value.ok) {
+            const csv = await totsRes.value.text();
+            const rows = parseCSV(csv);
+            if (rows.length > 0) rows.shift(); // remove header
+            rows.forEach(function(row) {
+              const thought = row[0] || '';
+              const tags = row[1] || '';
+              const date = row[2] || '';
+              const pinned = row[3] || '';
+              if (thought && isPinned(pinned)) {
+                items.push(createPinnedTot(thought, tags, date));
+              }
+            });
+          }
+
+          // Process Gallery (columns: url, caption, type, pinned)
+          if (galleryRes.status === 'fulfilled' && galleryRes.value.ok) {
+            const csv = await galleryRes.value.text();
+            const rows = parseCSV(csv);
+            if (rows.length > 0) rows.shift();
+            rows.forEach(function(row) {
+              const url = row[0] || '';
+              const caption = row[1] || '';
+              const type = (row[2] || 'photo').toLowerCase().trim();
+              const pinned = row[3] || '';
+              if (url && isPinned(pinned)) {
+                if (type === 'video') {
+                  items.push(createPinnedGalleryVideo(url, caption));
+                } else {
+                  items.push(createPinnedGalleryPhoto(url, caption));
+                }
+              }
+            });
+          }
+
+          // Process Music (columns: title, url, type, platform, pinned)
+          if (musicRes.status === 'fulfilled' && musicRes.value.ok) {
+            const csv = await musicRes.value.text();
+            const rows = parseCSV(csv);
+            if (rows.length > 0) rows.shift();
+            rows.forEach(function(row) {
+              const title = row[0] || '';
+              const url = row[1] || '';
+              const type = (row[2] || '').toLowerCase().trim();
+              const platform = (row[3] || '').toLowerCase().trim();
+              const pinned = row[4] || '';
+              if (title && url && isPinned(pinned)) {
+                const card = createPinnedMusic(title, url, type, platform);
+                if (card) items.push(card);
+              }
+            });
+          }
+
+          // Only show section if there are pinned items
+          if (items.length > 0) {
+            section.style.display = '';
+            items.forEach(function(item) {
+              grid.appendChild(item);
+            });
+            observeFadeIn(items);
+          }
+
+        } catch (err) {
+          // If all fails, just don't show the section. No big deal
+          console.error('Pinned section error:', err);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadPinned);
+      } else {
+        loadPinned();
+      }
+    })();
+  </script>
 </body>
 </html>
