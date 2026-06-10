@@ -954,6 +954,7 @@
       }
       function getStatusEmoji(status) {
         switch ((status || '').toLowerCase()) {
+          case 'unread': return '\u{1F4D5}';
           case 'reading': return '\u{1F4D6}';
           case 'finished': return '\u2705';
           case 'abandoned': return '\u{1F480}';
