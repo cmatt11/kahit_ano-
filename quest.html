@@ -71,7 +71,21 @@
           // Set page title and header
           document.title = quest.title + ' - Carla';
           document.getElementById('quest-title').textContent = (quest.emoji || '') + ' ' + quest.title;
-          document.getElementById('quest-description').textContent = quest.description || '';
+          // Main quest: if a link is set, show it (renameable label) below the
+          // title in place of the caption. Otherwise show the description.
+          var descEl = document.getElementById('quest-description');
+          if (quest.link) {
+            descEl.innerHTML = '';
+            var headerLink = document.createElement('a');
+            headerLink.href = quest.link;
+            headerLink.target = '_blank';
+            headerLink.rel = 'noopener noreferrer';
+            headerLink.className = 'preview-link';
+            headerLink.textContent = ((quest.link_label || '').trim() || 'Visit') + ' \u2192';
+            descEl.appendChild(headerLink);
+          } else {
+            descEl.textContent = quest.description || '';
+          }
           // Render items
           var container = document.getElementById('quest-items');
           var items = quest.items || [];
