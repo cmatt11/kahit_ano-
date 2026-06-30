@@ -59,7 +59,37 @@
       if (match) return match[1];
       return null;
     }
-    function createVideoCard(videoUrl, title, caption) {
+
+    function extractTikTokID(url) {
+      if (!url) return null;
+      // tiktok.com/@username/video/VIDEO_ID
+      let match = url.match(/tiktok\.com\/@[\w.-]+\/video\/(\d+)/);
+      if (match) return match[1];
+      // vm.tiktok.com/XXXX or vt.tiktok.com/XXXX (short links won't have an ID directly)
+      return null;
+    }
+
+    function isTikTokUrl(url) {
+      return !!url && url.includes('tiktok.com');
+    }
+
+    let tiktokScriptLoaded = false;
+    function loadTikTokEmbedScript() {
+      if (tiktokScriptLoaded) {
+        // Script already present, just ask it to re-scan for new blockquotes
+        if (window.tiktokEmbed && window.tiktokEmbed.lib && window.tiktokEmbed.lib.render) {
+          window.tiktokEmbed.lib.render();
+        }
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://www.tiktok.com/embed.js';
+      script.async = true;
+      document.body.appendChild(script);
+      tiktokScriptLoaded = true;
+    }
+
+    function createYouTubeCard(videoUrl, title, caption) {
       const videoId = extractYouTubeID(videoUrl);
       if (!videoId) return null;
       const card = document.createElement('div');
@@ -85,6 +115,60 @@
       card.appendChild(infoDiv);
       return card;
     }
+
+    function createTikTokCard(videoUrl, title, caption) {
+      const card = document.createElement('div');
+      card.className = 'video-card video-card-tiktok fade-in';
+
+      const embedDiv = document.createElement('div');
+      embedDiv.className = 'video-embed video-embed-tiktok';
+
+      const videoId = extractTikTokID(videoUrl);
+
+      const blockquote = document.createElement('blockquote');
+      blockquote.className = 'tiktok-embed';
+      blockquote.setAttribute('cite', videoUrl);
+      if (videoId) {
+        blockquote.setAttribute('data-video-id', videoId);
+      }
+      blockquote.style.maxWidth = '605px';
+      blockquote.style.minWidth = '325px';
+
+      const section = document.createElement('section');
+      const anchor = document.createElement('a');
+      anchor.href = videoUrl;
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+      anchor.textContent = title || 'Watch on TikTok';
+      section.appendChild(anchor);
+      blockquote.appendChild(section);
+
+      embedDiv.appendChild(blockquote);
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'video-info';
+      const h3 = document.createElement('h3');
+      h3.textContent = title || 'Untitled';
+      const p = document.createElement('p');
+      p.textContent = caption || '';
+      infoDiv.appendChild(h3);
+      infoDiv.appendChild(p);
+
+      card.appendChild(embedDiv);
+      card.appendChild(infoDiv);
+
+      return card;
+    }
+
+    function createVideoCard(videoUrl, title, caption) {
+      if (isTikTokUrl(videoUrl)) {
+        return createTikTokCard(videoUrl, title, caption);
+      }
+      const ytCard = createYouTubeCard(videoUrl, title, caption);
+      if (ytCard) return ytCard;
+      return null;
+    }
+
     function observeFadeIn(elements) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -98,6 +182,7 @@
       });
       elements.forEach(el => observer.observe(el));
     }
+
     async function loadVideos() {
       const grid = document.getElementById('videos-grid');
       const loading = document.getElementById('videos-loading');
@@ -106,18 +191,23 @@
         if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
         const rows = data.videos || [];
-        // Remove loading
+
         loading.remove();
+
         if (rows.length === 0) {
           grid.innerHTML = '<div class="videos-empty"><p>wala pang videos dito... babalik ako soon!</p></div>';
           return;
         }
+
         const cards = [];
+        let hasTikTok = false;
+
         rows.forEach(function(item) {
           const videoUrl = item.video_url || '';
           const title = item.title || '';
           const caption = item.caption || '';
           if (videoUrl) {
+            if (isTikTokUrl(videoUrl)) hasTikTok = true;
             const card = createVideoCard(videoUrl, title, caption);
             if (card) {
               grid.appendChild(card);
@@ -125,17 +215,24 @@
             }
           }
         });
+
         if (cards.length === 0) {
           grid.innerHTML = '<div class="videos-empty"><p>wala pang videos dito... babalik ako soon!</p></div>';
           return;
         }
-        // Observe all new cards for fade-in animation
+
+        // Load TikTok's embed script only if there's at least one TikTok video
+        if (hasTikTok) {
+          loadTikTokEmbedScript();
+        }
+
         observeFadeIn(cards);
       } catch (error) {
         loading.remove();
         grid.innerHTML = '<div class="videos-empty"><p>ay sorry, di ko ma-load yung videos right now. try mo ulit mamaya!</p></div>';
       }
     }
+
     loadVideos();
   </script>
   <!-- Footer -->
