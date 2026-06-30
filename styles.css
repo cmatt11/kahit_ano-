@@ -1186,11 +1186,18 @@ img {
   transform: scale(1.2);
 }
 
-.video-embed-tiktok {
+.video-card .video-embed-tiktok {
+  position: static;
   height: auto;
-  min-height: 580px;
+  padding-bottom: 0;
   display: flex;
   justify-content: center;
+  overflow: visible;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.video-card.video-card-tiktok {
   overflow: visible;
 }
 
