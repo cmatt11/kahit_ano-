@@ -1186,3 +1186,14 @@ img {
   transform: scale(1.2);
 }
 
+.video-embed-tiktok {
+  height: auto;
+  min-height: 580px;
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+}
+
+.video-embed-tiktok blockquote.tiktok-embed {
+  margin: 0;
+}
