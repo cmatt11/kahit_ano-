@@ -78,6 +78,9 @@
         };
       }
       function getYouTubeEmbed(url) {
+        // Check for playlist param first
+        const playlistMatch = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+
         // Extract video ID from various YouTube URL formats
         let videoId = null;
         const patterns = [
@@ -92,7 +95,26 @@
             break;
           }
         }
+
+        if (playlistMatch && !videoId) {
+          // Pure playlist link -> embed the whole playlist
+          return {
+            src: 'https://www.youtube.com/embed/videoseries?list=' + playlistMatch[1],
+            height: 352
+          };
+        }
+
+        if (videoId && playlistMatch) {
+          // Single video that belongs to a playlist -> embed with playlist sidebar
+          return {
+            src: 'https://www.youtube.com/embed/' + videoId + '?list=' + playlistMatch[1],
+            height: 352
+          };
+        }
+
         if (!videoId) return null;
+
+        // Single video, no playlist
         return {
           src: 'https://www.youtube.com/embed/' + videoId,
           height: 200
