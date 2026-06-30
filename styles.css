@@ -1185,22 +1185,3 @@ img {
 .footer-heart-link:hover .footer-heart {
   transform: scale(1.2);
 }
-
-.video-card .video-embed-tiktok {
-  position: static;
-  height: auto;
-  padding-bottom: 0;
-  display: flex;
-  justify-content: center;
-  overflow: visible;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.video-card.video-card-tiktok {
-  overflow: visible;
-}
-
-.video-embed-tiktok blockquote.tiktok-embed {
-  margin: 0;
-}
